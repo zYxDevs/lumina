@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Memory pressure watchdog.** Replaced blanket model unload with LRU eviction based on native memory queries (NVML for CUDA VRAM, Win32 `GlobalMemoryStatusEx` for system RAM). Models stay resident under 80% threshold; only idle ones (>5 min) get evicted. Set `LUMINA_KEEP_MODELS=1` to disable entirely.
 - **Better logging for development.** Consistent leveled logging across Python backend and Electron frontend. Set `LUMINA_LOG_LEVEL=debug` in `.env` for verbose per-step output.
 - **Layer list now reflects visual stacking order.** Index 1 in the list is the topmost layer visually; layers lower in the list sit underneath. Previously the list order was inverted relative to the canvas.
 - **OCR text normalization option.** New setting in Settings → General to normalize OCR text case: as-is (default), lowercase, or uppercase.

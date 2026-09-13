@@ -17,7 +17,7 @@
 - [x] export window with PNG/JPG + reorder
 - [x] caching managements
 - [x] more efficient model description
-- [ ] more efficient model loading
+- [x] more efficient model loading
 - [x] make undo/redo different per page/image
 - [x] warn when closing app with unsaved changes
 - [x] re-design export window and replace warn

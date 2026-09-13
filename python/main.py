@@ -132,31 +132,37 @@ def device_configure(req: DeviceConfigureRequest):
     return configure(req.useGpu)
 
 
-def _keep_one_hot(kind: str) -> None:
-    """Release model sessions of every kind except ``kind`` (VRAM policy).
+from utils.memory import ModelTracker
 
-    Only the most recently used model stays resident; the rest are unloaded
-    so VRAM usage stays flat (~1 model + transient activations) on small
-    GPUs. Lazy re-load on the next step costs 1–3 s per model.
+_tracker = ModelTracker()
+
+def _register_models() -> None:
+    """Register model kinds with their unload functions (lazy, one-time)."""
+    from services.detect import unload_models as unload_detect
+    from services.ocr import unload_models as unload_ocr
+    from services.inpaint import unload_models as unload_inpaint
+
+    _tracker.register("detect", unload_detect)
+    _tracker.register("ocr", unload_ocr)
+    _tracker.register("inpaint", unload_inpaint)
+
+def _keep_one_hot(kind: str) -> None:
+    """Touch model kind and evict idle ones if memory is under pressure.
+
+    Replaces the old always-unload approach with a memory-aware LRU.
     Set ``LUMINA_KEEP_MODELS=1`` to disable (keep everything loaded).
     """
-    if os.environ.get("LUMINA_KEEP_MODELS"):
-        return
-    try:
-        if kind != "detect":
-            from services.detect import unload_models as unload_detect
+    _ensure_registered()
+    _tracker.touch(kind)
+    _tracker.evict_if_needed()
 
-            unload_detect()
-        if kind != "ocr":
-            from services.ocr import unload_models as unload_ocr
-
-            unload_ocr()
-        if kind != "inpaint":
-            from services.inpaint import unload_models as unload_inpaint
-
-            unload_inpaint()
-    except Exception as e:
-        log.debug(f"Model unload skipped: {e}")
+# Auto-register on first use
+def _ensure_registered() -> None:
+    if not _tracker._unload_fn:
+        try:
+            _register_models()
+        except Exception as e:
+            log.debug(f"Model tracker registration skipped: {e}")
 
 
 @app.post("/detect", response_model=DetectResponse)
