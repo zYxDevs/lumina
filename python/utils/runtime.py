@@ -117,7 +117,17 @@ def create_session(
     providers = resolve_providers(prefer)
     if sess_options is None:
         sess_options = make_session_options()
-    log.debug(f"create_session: {os.path.basename(str(model_path))}, providers={providers}")
+    assert sess_options is not None
+    # Cache the optimized graph to disk — next load skips graph fusion.
+    model_str = str(model_path)
+    ep_tag = providers[0].replace("ExecutionProvider", "").lower()
+    opt_path = f"{model_str}.{ep_tag}.opt"
+    sess_options.optimized_model_filepath = opt_path
+    cached = os.path.isfile(opt_path)
+    log.debug(
+        f"create_session: {os.path.basename(model_str)}, providers={providers}"
+        + (", using cached optimized model" if cached else ", building optimized graph")
+    )
     try:
         session = ort.InferenceSession(
             str(model_path), sess_options=sess_options, providers=providers
