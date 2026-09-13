@@ -597,6 +597,17 @@ export const typeSection = {
       const menu = document.createElement("div");
       menu.id = "type-size-presets";
       menu.className = "type-size-menu";
+      // Auto-fit option (reset to null = fit to box)
+      const autoItem = document.createElement("button");
+      autoItem.className = "type-size-item";
+      autoItem.textContent = i18n.t("type.auto");
+      autoItem.style.fontStyle = "italic";
+      autoItem.addEventListener("click", function () {
+        input.value = "";
+        typeSection._apply({ fontSize: null });
+        menu.remove();
+      });
+      menu.appendChild(autoItem);
       FONT_SIZE_PRESETS.forEach(function (s) {
         const item = document.createElement("button");
         item.className = "type-size-item";

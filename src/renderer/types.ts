@@ -103,7 +103,11 @@ const GLOBAL_TYPE_KEY = "lumina-global-type";
 export function loadGlobalTypography(): Typography {
   try {
     const raw = localStorage.getItem(GLOBAL_TYPE_KEY);
-    if (raw) return Object.assign(defaultTypography(), JSON.parse(raw));
+    if (raw) {
+      const t = Object.assign(defaultTypography(), JSON.parse(raw));
+      t.fontSize = null; // session-only — always start with auto-fit
+      return t;
+    }
   } catch {
     /* corrupted — fall through */
   }
@@ -112,7 +116,9 @@ export function loadGlobalTypography(): Typography {
 
 export function saveGlobalTypography(t: Typography): void {
   try {
-    localStorage.setItem(GLOBAL_TYPE_KEY, JSON.stringify(t));
+    // fontSize is session-only — exclude from persistence so it resets to auto on restart.
+    const copy = Object.assign({}, t, { fontSize: null });
+    localStorage.setItem(GLOBAL_TYPE_KEY, JSON.stringify(copy));
   } catch {
     /* storage full/blocked — non-fatal */
   }
