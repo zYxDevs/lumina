@@ -7,6 +7,7 @@ from typing import Callable, Optional
 from .base import BaseInpaintModel, ProgressCallback
 from .lama.model import LamaModel
 from .lama_manga.model import LamaMangaModel
+from utils.logger import log
 
 MODELS: dict[str, BaseInpaintModel] = {
     "lama": LamaModel(),
@@ -45,7 +46,7 @@ def download_model(callback: ProgressCallback = None) -> None:
     cb = callback or progress_callback
     for name, m in MODELS.items():
         if not m.is_ready():
-            print(f"[Lumina] Downloading inpaint model: {name}")
+            log.info(f"Downloading inpaint model: {name}")
             m.download(cb)
 
 

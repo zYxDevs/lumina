@@ -52,7 +52,7 @@ class BaseDetectModel(ABC):
     def download(self, progress_callback: ProgressCallback = None) -> None:
         """Download missing weights; blocks until done."""
         if self.is_ready():
-            log.info(f"Detect model already present: {self.model_path}")
+            log.debug(f"Detect model already present: {self.model_path}")
             return
 
         self.model_path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,13 +111,13 @@ class BaseDetectModel(ABC):
             if not self.is_ready():
                 self.download()
 
-            log.info(f"Loading detect ONNX model: {self.model_path}")
+            log.debug(f"Loading detect ONNX model: {self.model_path}")
             self._session = create_session(
                 self.model_path,
                 prefer=self.prefer,
                 sess_options=make_session_options(),
             )
-            log.info(
+            log.debug(
                 f"Detect ONNX session ready (inputs: "
                 f"{[(i.name, i.shape) for i in self._session.get_inputs()]})"
             )

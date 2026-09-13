@@ -78,7 +78,7 @@ class BaberuOcrModel(BaseOcrModel):
         from utils.runtime import create_session, make_session_options
 
         so = make_session_options()
-        log.info("Loading Baberu OCR ONNX...")
+        log.debug("Loading Baberu OCR ONNX...")
         self._vis = create_session(
             self.model_dir / VISION_FILE, prefer=PREFER_VISION, sess_options=so
         )

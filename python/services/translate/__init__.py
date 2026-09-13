@@ -5,6 +5,7 @@ import importlib
 from typing import Callable
 
 from ._base import TranslateError
+from utils.logger import log
 
 ProviderFn = Callable[[str, str, dict], str]
 BatchFn = Callable[[list[str], str, dict], list[str]]
@@ -45,7 +46,9 @@ def translate_text(text: str, config: dict) -> str:
     name = _provider_name(config)
     if name not in _PROVIDERS:
         raise TranslateError(f"Unknown translation provider: {name!r}")
-    return _provider_fn(name)(text, config.get("targetLang") or "en", config)
+    target = config.get("targetLang") or "en"
+    log.debug(f"Translate: provider={name} target={target} len={len(text)}")
+    return _provider_fn(name)(text, target, config)
 
 
 def translate_texts(texts: list[str], config: dict) -> list[str]:
@@ -54,6 +57,7 @@ def translate_texts(texts: list[str], config: dict) -> list[str]:
     if name not in _PROVIDERS:
         raise TranslateError(f"Unknown translation provider: {name!r}")
     target = config.get("targetLang") or "en"
+    log.debug(f"Translate batch: provider={name} target={target} count={len(texts)}")
 
     non_empty = [(i, t) for i, t in enumerate(texts) if t.strip()]
     if not non_empty:

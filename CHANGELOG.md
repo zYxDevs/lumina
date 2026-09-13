@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Better logging for development.** Consistent leveled logging across Python backend and Electron frontend. Set `LUMINA_LOG_LEVEL=debug` in `.env` for verbose per-step output.
 - **Layer list now reflects visual stacking order.** Index 1 in the list is the topmost layer visually; layers lower in the list sit underneath. Previously the list order was inverted relative to the canvas.
 - **OCR text normalization option.** New setting in Settings → General to normalize OCR text case: as-is (default), lowercase, or uppercase.
 - **Frontend codebase refactor.** All TypeScript renderer code reorganized for maintainability — files grouped into logical folders, filenames standardized to kebab-case, and comments simplified to short JSDoc.

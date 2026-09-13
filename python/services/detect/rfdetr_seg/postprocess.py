@@ -6,6 +6,7 @@ from typing import Optional
 import numpy as np
 
 from .config import CLASS_NAMES, CLASS_THRESHOLDS, MASK_SIZE
+from utils.logger import log
 
 
 def split_outputs(
@@ -47,9 +48,14 @@ def postprocess(
     """Decode outputs into detection lists + optional full-page text mask."""
     import cv2 as cv
 
+    log.debug(
+        f"RF-DETR postprocess: dets{list(dets.shape)} "
+        f"labels{list(labels.shape)} masks{list(masks.shape)}"
+    )
     scores = 1.0 / (1.0 + np.exp(-labels[..., :4]))  # [1, 300, 4]
     class_ids = scores.argmax(axis=-1)[0]
     confs = scores.max(axis=-1)[0]
+    total = int(dets.shape[1])
 
     text_detections = []
     bubble_detections = []
@@ -92,6 +98,11 @@ def postprocess(
         "textDetections": text_detections,
         "bubbleDetections": bubble_detections,
     }
+    log.debug(
+        f"RF-DETR postprocess: {total} candidates "
+        f"-> {len(text_detections)} text, {len(bubble_detections)} bubbles, "
+        f"{len(text_masks)} masks (thresholds={CLASS_THRESHOLDS})"
+    )
 
     if not text_masks:
         return result, None

@@ -35,9 +35,11 @@ export const detection = {
     }
 
     try {
+      const model = models.selectedModel("detect") || "rtdetr";
+      log.debug("fe", `detect: start model=${model} page=${page.fileName}`);
       const result = await window.lumina.apiPost<DetectResult>("/detect", {
         imagePath: page.filePath,
-        model: models.selectedModel("detect") || "rtdetr",
+        model,
       });
       if (!result || result.error)
         throw new Error(result?.detail || "Detection failed");
@@ -59,6 +61,10 @@ export const detection = {
       );
       page.textDetections = sortedTexts;
       page.maskPath = result.maskPath ?? null;
+      log.debug(
+        "fe",
+        `detect: done texts=${sortedTexts.length} bubbles=${(result.bubbleDetections || []).length}`,
+      );
 
       // Balloon text gets a roomier typesetting box: the interior of its
       // bubble shell. OCR & inpaint keep the glyph-tight text boxes above;

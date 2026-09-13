@@ -59,7 +59,7 @@ class BaseInpaintModel(ABC):
 
     def download(self, progress_callback: ProgressCallback = None) -> None:
         if self.is_ready():
-            log.info(f"Inpaint model already present: {self.model_path}")
+            log.debug(f"Inpaint model already present: {self.model_path}")
             return
 
         self.model_path.parent.mkdir(parents=True, exist_ok=True)
@@ -114,13 +114,13 @@ class BaseInpaintModel(ABC):
             if not self.is_ready():
                 self.download()
 
-            log.info(f"Loading inpaint ONNX model: {self.model_path}")
+            log.debug(f"Loading inpaint ONNX model: {self.model_path}")
             self._session = create_session(
                 self.model_path,
                 prefer=self.prefer,
                 sess_options=make_session_options(),
             )
-            log.info(
+            log.debug(
                 f"Inpaint session ready (inputs: "
                 f"{[(i.name, i.shape) for i in self._session.get_inputs()]})"
             )

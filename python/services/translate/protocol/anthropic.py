@@ -12,6 +12,7 @@ from .._base import TranslateError
 
 def chat(base_url: str, api_key: str, model: str, system: str, user: str) -> str:
     log.debug(f"Anthropic chat request: {base_url} model={model}")
+    log.debug(f"Anthropic system prompt: {system[:200]}{'...' if len(system) > 200 else ''}")
     client = Anthropic(
         base_url=base_url.rstrip("/"),
         # Local servers accept any placeholder key

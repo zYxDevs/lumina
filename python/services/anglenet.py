@@ -216,6 +216,7 @@ def predict(crop_bgr: np.ndarray) -> Tuple[Optional[float], Optional[bool]]:
     pw, ph = int(w * 0.10), int(h * 0.10)
     ctx = np.pad(gray, ((ph, ph), (pw, pw)), mode="edge")
     tensor = _letterbox(ctx, 64)
+    log.debug(f"AngleNet predict: crop {w}x{h}, tensor {tensor.shape}")
     csl_logits, _tilt = sess.run(None, {"input": tensor})
     pred_deg = _decode_angle(csl_logits)
     return pred_deg, h >= w

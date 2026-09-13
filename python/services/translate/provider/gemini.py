@@ -8,6 +8,7 @@ from .._base import (
     http_post_json,
     parse_batch_response,
 )
+from utils.logger import log
 
 _API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
@@ -20,7 +21,9 @@ def translate_batch(
     if not api_key:
         raise TranslateError("Gemini API key not configured")
 
+    log.debug(f"Gemini translate: model={model} count={len(texts)}")
     system = build_system_instruction(config, target, previous_line="")
+    log.debug(f"Gemini system prompt: {system[:200]}{'...' if len(system) > 200 else ''}")
     user = build_batch_prompt(
         texts,
         target,

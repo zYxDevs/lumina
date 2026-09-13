@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 
 from services import anglenet
+from utils.logger import log
 
 DIST_THRESHOLD = 40.0
 MIN_FG_PIXELS = 20
@@ -62,6 +63,7 @@ def _box_style(crop: np.ndarray) -> tuple[Optional[str], Optional[float]]:
     fg = crop[fg_mask]
 
     total = h * w
+    log.debug(f"color: bg={bg.astype(int)}, fg_px={fg.shape[0]}/{total}")
     if fg.shape[0] < MIN_FG_PIXELS or fg.shape[0] > total * MAX_FG_RATIO:
         return None, None
 
@@ -82,9 +84,10 @@ def detect_text_styles(image_path: str, boxes: list[dict]) -> list[dict]:
 
     img = np.asarray(Image.open(image_path).convert("RGB"))
     ih, iw = img.shape[:2]
+    log.debug(f"color: image {iw}x{ih}, {len(boxes)} box(es)")
 
     styles: list[dict] = []
-    for b in boxes:
+    for i, b in enumerate(boxes):
         x0 = max(0, int(b["x"]))
         y0 = max(0, int(b["y"]))
         x1 = min(iw, int(b["x"]) + max(0, int(b["w"])))
@@ -92,7 +95,12 @@ def detect_text_styles(image_path: str, boxes: list[dict]) -> list[dict]:
         if x1 - x0 < 2 or y1 - y0 < 2:
             styles.append({"color": None, "angle": None})
             continue
-        color, angle = _box_style(img[y0:y1, x0:x1])
+        crop = img[y0:y1, x0:x1]
+        log.debug(
+            f"color: box[{i}] crop {crop.shape[1]}x{crop.shape[0]}"
+        )
+        color, angle = _box_style(crop)
+        log.debug(f"color: box[{i}] -> {color}, angle={angle}")
         styles.append({"color": color, "angle": angle})
 
     return styles

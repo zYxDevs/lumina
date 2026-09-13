@@ -66,6 +66,6 @@
 - [ ] add multi selection feature
 - [x] fix font fitting visually changed when zoom in/out
 - [ ] fix translate slow loading when cached secret keys are cleared in ram by LMK
-- [ ] normalize log and add more debug log
+- [x] normalize log and add more debug log
 - [ ] redesign UI
 - [ ] testing and hunt another bugs

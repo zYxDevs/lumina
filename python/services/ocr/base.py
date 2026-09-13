@@ -57,7 +57,7 @@ class BaseOcrModel(ABC):
             jobs.append((base_url + f + "?download=true", f))
         pending = [j for j in jobs if not (self.model_dir / j[1]).is_file()]
         if not pending:
-            log.info(f"OCR model already present: {self.model_id}")
+            log.debug(f"OCR model already present: {self.model_id}")
             return
 
         log.info(f"Downloading OCR model {self.model_id} ...")

@@ -6,6 +6,7 @@ from typing import Optional
 from .base import BaseDetectModel, ProgressCallback
 from .rtdetr.model import RTDetrModel
 from .rfdetr_seg.model import RfDetrSegModel
+from utils.logger import log
 
 MODELS: dict[str, BaseDetectModel] = {
     "rtdetr": RTDetrModel(),
@@ -45,7 +46,7 @@ def download_model(callback: ProgressCallback = None) -> None:
     cb = callback or progress_callback
     for name, m in MODELS.items():
         if not m.is_ready():
-            print(f"[Lumina] Downloading detect model: {name}")
+            log.info(f"Downloading detect model: {name}")
             m.download(cb)
 
 

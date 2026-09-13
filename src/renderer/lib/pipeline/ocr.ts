@@ -31,17 +31,23 @@ export const ocr = {
     );
 
     try {
+      const model = models.selectedModel("ocr") || "manga_ocr";
+      log.debug(
+        "fe",
+        `ocr: start model=${model} boxes=${page.textDetections.length}`,
+      );
       const result = await window.lumina.apiPost<{
         results?: OcrResult[];
         detail?: string;
       }>("/ocr", {
         imagePath: page.filePath,
         boxes: page.textDetections.map((d) => d.bbox),
-        model: models.selectedModel("ocr") || "manga_ocr",
+        model,
       });
       if (!result || !result.results)
         throw new Error(result?.detail || "OCR failed");
 
+      log.debug("fe", `ocr: done ${(result.results || []).length} result(s)`);
       (result.results || []).forEach(function (r) {
         const text = normalizeAutoText(r.text || "");
         const det = page.textDetections[r.index];
@@ -110,13 +116,15 @@ export const ocr = {
     );
 
     try {
+      const model = modelId || models.selectedModel("ocr") || "manga_ocr";
+      log.debug("fe", `ocr boxes: start model=${model} indices=[${indices}]`);
       const result = await window.lumina.apiPost<{
         results?: OcrResult[];
         detail?: string;
       }>("/ocr", {
         imagePath: page.filePath,
         boxes: boxes,
-        model: modelId || models.selectedModel("ocr") || "manga_ocr",
+        model,
       });
       if (!result || !result.results)
         throw new Error(result?.detail || "OCR failed");

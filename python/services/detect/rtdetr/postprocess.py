@@ -4,6 +4,7 @@ from __future__ import annotations
 import numpy as np
 
 from .config import CLASS_MAP, SCORE_THRESHOLD
+from utils.logger import log
 
 
 def split_outputs(
@@ -33,8 +34,13 @@ def postprocess(
     orig_h: int,
 ) -> dict:
     """Threshold decoded outputs into detection lists."""
+    log.debug(
+        f"RT-DETR postprocess: labels{list(labels.shape)} "
+        f"boxes{list(boxes.shape)} scores{list(scores.shape)}"
+    )
     text_detections = []
     bubble_detections = []
+    total = len(boxes[0])
 
     # Baidu-style export already decodes: absolute xyxy pixels, argmax applied
     for box_xyxy, score, cls_id in zip(boxes[0], scores[0], labels[0]):
@@ -65,6 +71,11 @@ def postprocess(
                 {"bbox": bbox, "type": cls_name, "confidence": conf}
             )
 
+    log.debug(
+        f"RT-DETR postprocess: {total} candidates "
+        f"-> {len(text_detections)} text, {len(bubble_detections)} bubbles "
+        f"(threshold={SCORE_THRESHOLD})"
+    )
     return {
         "textDetections": text_detections,
         "bubbleDetections": bubble_detections,

@@ -93,6 +93,7 @@ def resolve_providers(prefer: Optional[str] = None) -> list[str]:
     if dml in avail:
         eps.append(dml)
     eps.append(cpu)
+    log.debug(f"Providers resolved: prefer={pref}, avail={avail}, result={eps}")
     return eps
 
 
@@ -116,6 +117,7 @@ def create_session(
     providers = resolve_providers(prefer)
     if sess_options is None:
         sess_options = make_session_options()
+    log.debug(f"create_session: {os.path.basename(str(model_path))}, providers={providers}")
     try:
         session = ort.InferenceSession(
             str(model_path), sess_options=sess_options, providers=providers
@@ -204,6 +206,7 @@ def get_device_info() -> dict:
         return dict(_DEVICE_CACHE)
 
     eps = get_available_providers()
+    log.debug(f"Device info: available providers={eps}")
     cuda, dml, cpu = (
         "CUDAExecutionProvider",
         "DmlExecutionProvider",

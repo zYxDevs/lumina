@@ -167,6 +167,10 @@ export const translate = {
     try {
       // Full config incl. api keys from the encrypted vault
       const config = await translateSettings.loadWithSecrets();
+      log.debug(
+        "fe",
+        `translate: start provider=${config.provider} texts=${withText.length} lang=${config.targetLang}`,
+      );
       const result = await window.lumina.apiPost<{
         results?: Array<{ index: number; text: string }>;
         detail?: string;
@@ -195,6 +199,11 @@ export const translate = {
       });
       if (!result || !result.results)
         throw new Error(result?.detail || "Translation failed");
+
+      log.debug(
+        "fe",
+        `translate: done ${(result.results || []).length} result(s)`,
+      );
 
       // Map back via identity of filtered items
       withText.forEach(function (det: TextDetection, i: number) {
@@ -263,6 +272,7 @@ export const translate = {
       }
 
       const config = await translateSettings.loadWithSecrets();
+      log.debug("fe", `retranslate layer=${id} provider=${config.provider}`);
       const result = await window.lumina.apiPost<{
         results?: Array<{ index: number; text: string }>;
         detail?: string;

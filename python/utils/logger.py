@@ -40,8 +40,8 @@ def _emit(level: str, level_no: int, msg: str) -> None:
         return
     with _lock:
         if _is_subprocess:
-            # Raw — main process handles formatting.
-            print(msg, flush=True)
+            # Raw with level prefix — main process parses "LEVEL: msg".
+            print(f"{level.upper()}: {msg}", flush=True)
         else:
             ts = datetime.now().strftime("%H:%M:%S")
             color = _COLORS.get(level, "")

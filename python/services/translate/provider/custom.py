@@ -8,6 +8,7 @@ from .._base import (
     build_system_instruction,
     parse_batch_response,
 )
+from utils.logger import log
 
 
 def _resolve(config: dict) -> tuple[str, str, str, str]:
@@ -45,6 +46,7 @@ def translate(text: str, target: str, config: dict) -> str:
         raise TranslateError("LLM base URL not configured")
     if not model:
         raise TranslateError("LLM model not configured")
+    log.debug(f"Custom translate: style={style} model={model}")
     system = build_system_instruction(config, target)
     prev = config.get("previousLines") or ""
     if isinstance(prev, list):

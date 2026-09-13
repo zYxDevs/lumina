@@ -167,11 +167,13 @@ def detect(req: DetectRequest):
     try:
         from services.detect import detect as run_detect
 
+        log.debug(f"Detect: model={req.model}, path={req.imagePath}")
         result = run_detect(req.imagePath, model=req.model)
         texts = result["textDetections"]
         if texts:
             from services.color import detect_text_styles
 
+            log.debug(f"Detect: {len(texts)} text box(es), running color analysis")
             styles = detect_text_styles(req.imagePath, [t["bbox"] for t in texts])
             for det, style in zip(texts, styles):
                 if style["color"]:
@@ -203,6 +205,7 @@ def ocr(req: OcrRequest):
     try:
         from services.ocr import ocr_boxes
 
+        log.debug(f"OCR: model={req.model}, {len(req.boxes)} box(es)")
         texts = ocr_boxes(
             req.imagePath, [b.model_dump() for b in req.boxes], model=req.model
         )
@@ -228,6 +231,7 @@ def translate(req: TranslateRequest):
         from services.translate import translate_texts, TranslateError
 
         cfg = req.config.model_dump()
+        log.debug(f"Translate: {len(req.texts)} text(s), provider={cfg.get('provider', '?')}")
         prev_lines = req.previousLines or []
         # Per-text continuity context (used by single-text LLM calls)
         if prev_lines:
@@ -261,6 +265,7 @@ def inpaint(req: InpaintRequest):
     try:
         from services.inpaint import inpaint_boxes
 
+        log.debug(f"Inpaint: model={req.model}, {len(req.boxes)} box(es)")
         patches = inpaint_boxes(
             req.imagePath,
             [b.model_dump() for b in req.boxes],
@@ -423,7 +428,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args()
-    print(f"[Lumina Backend] Starting on port {args.port}")
+    log.info(f"Starting backend on port {args.port}")
     uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="info")
 
 

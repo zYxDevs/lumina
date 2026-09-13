@@ -5,6 +5,7 @@ import cv2 as cv
 import numpy as np
 
 from .config import INPUT_SIZE, MASK_BINARY, MASK_DILATE
+from utils.logger import log
 
 
 def build_mask(
@@ -39,7 +40,9 @@ def build_mask(
     kernel = cv.getStructuringElement(
         cv.MORPH_ELLIPSE, (MASK_DILATE * 2 + 1,) * 2
     )
-    return cv.dilate(mask, kernel)
+    mask = cv.dilate(mask, kernel)
+    log.debug(f"build_mask: crop{crop.shape[:2]} mask_nonzero={cv.countNonZero(mask)}")
+    return mask
 
 
 def letterbox(
@@ -66,6 +69,7 @@ def letterbox(
         cv.BORDER_CONSTANT,
         value=0,
     )
+    log.debug(f"letterbox: {ch}x{cw} -> {nw}x{nh} pad({pad_x},{pad_y}) -> {s}x{s}")
     return img_sq, mask_sq, nw, nh, pad_x, pad_y
 
 

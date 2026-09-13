@@ -48,7 +48,7 @@ class MangaOcrModel(BaseOcrModel):
         from utils.runtime import create_session, make_session_options
 
         so = make_session_options()
-        log.info("Loading manga-ocr ONNX...")
+        log.debug("Loading manga-ocr ONNX...")
         self._enc = create_session(
             self.model_dir / "encoder_model.onnx",
             prefer=PREFER_ENC,

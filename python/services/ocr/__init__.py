@@ -8,6 +8,7 @@ from .baberu.model import BaberuOcrModel
 from .manga_ocr.model import MangaOcrModel
 from .paddleocr_vl.model import PaddleOcrVlModel
 from .ppocrv6.model import PPOcrV6Model
+from utils.logger import log
 
 MODELS: dict[str, BaseOcrModel] = {
     "manga_ocr": MangaOcrModel(),
@@ -49,7 +50,7 @@ def download_model(callback: ProgressCallback = None) -> None:
     cb = callback or progress_callback
     for name, m in MODELS.items():
         if not m.is_ready():
-            print(f"[Lumina] Downloading OCR model: {name}")
+            log.info(f"Downloading OCR model: {name}")
             m.download(cb)
 
 

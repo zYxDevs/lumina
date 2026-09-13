@@ -9,6 +9,7 @@ from .._base import (
     parse_batch_response,
 )
 from ..protocol.openai import chat
+from utils.logger import log
 
 _BASE_URL = "https://api.groq.com/openai/v1"
 
@@ -26,6 +27,7 @@ def translate(text: str, target: str, config: dict) -> str:
     base_url, api_key, model = _resolve(config)
     if not model:
         raise TranslateError("LLM model not configured")
+    log.debug(f"Grok translate: model={model}")
     system = build_system_instruction(config, target)
     prev = config.get("previousLines") or ""
     if isinstance(prev, list):

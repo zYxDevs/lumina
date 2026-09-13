@@ -55,6 +55,11 @@ export const inpaint = {
     );
 
     try {
+      const model = models.selectedModel("inpaint") || "lama_manga";
+      log.debug(
+        "fe",
+        `inpaint: start model=${model} boxes=${page.textDetections.length}`,
+      );
       const result = await window.lumina.apiPost<{
         patches?: Array<{ bbox: BBox; imagePath: string }>;
         detail?: string;
@@ -62,11 +67,15 @@ export const inpaint = {
         imagePath: page.filePath,
         maskPath: page.maskPath ?? null,
         boxes: page.textDetections.map((d) => d.bbox),
-        model: models.selectedModel("inpaint") || "lama_manga",
+        model,
       });
       if (!result || !Array.isArray(result.patches))
         throw new Error(result?.detail || "Inpaint failed");
 
+      log.debug(
+        "fe",
+        `inpaint: done ${(result.patches || []).length} patch(es)`,
+      );
       const ts = Date.now();
       const masks: InpaintMask[] = [];
       for (let i = 0; i < result.patches.length; i++) {

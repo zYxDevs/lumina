@@ -47,7 +47,7 @@ class PPOcrV6Model(BaseOcrModel):
 
         import yaml
 
-        log.info("Loading PP-OCRv6 ONNX...")
+        log.debug("Loading PP-OCRv6 ONNX...")
         self._session = create_session(
             self.model_dir / ONNX_FILE,
             prefer=self.prefer,

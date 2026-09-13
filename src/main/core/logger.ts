@@ -8,16 +8,24 @@ import {
   type LogLevel,
 } from "../../shared/logger";
 
-const minLevel: number =
-  LEVEL_NUM[(process.env.LOG_LEVEL ?? "info").toLowerCase() as LogLevel] ??
-  LEVEL_NUM.info;
+function getMinLevel(): number {
+  return (
+    LEVEL_NUM[
+      (
+        process.env.LOG_LEVEL ??
+        process.env.LUMINA_LOG_LEVEL ??
+        "info"
+      ).toLowerCase() as LogLevel
+    ] ?? LEVEL_NUM.info
+  );
+}
 
 function ts(): string {
   return new Date().toLocaleTimeString("en-GB", { hour12: false });
 }
 
 function emit(level: LogLevel, tag: string, msg: string): void {
-  if (LEVEL_NUM[level] < minLevel) return;
+  if (LEVEL_NUM[level] < getMinLevel()) return;
   const color = LEVEL_COLOR[level];
   const levelStr = level.toUpperCase().padEnd(5);
   const line = `${color}[${ts()}] [${levelStr}] [${tag}] ${msg}${RESET}`;

@@ -23,14 +23,17 @@ class RfDetrSegModel(BaseDetectModel):
     def detect(self, image_path: str) -> dict:
         session = self._load_session()
 
+        log.debug(f"Detect input: {image_path}")
         tensor, w, h = prep.preprocess(image_path)
         outputs = [np.asarray(o) for o in session.run(None, {"input": tensor})]
+        log.debug(f"ONNX outputs: {[list(o.shape) for o in outputs]}")
 
         dets, labels, masks = pp.split_outputs(session, outputs)
         result, mask = pp.postprocess(dets, labels, masks, w, h)
 
         if mask is not None:
             result["maskPath"] = mask_io.save_mask(mask, image_path)
+            log.debug(f"Mask saved: {result['maskPath']}")
 
         log.info(
             f"Detected {len(result['textDetections'])} text, "

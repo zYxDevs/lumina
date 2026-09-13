@@ -36,6 +36,7 @@ class LamaMangaModel(BaseInpaintModel):
         if img is None:
             raise ValueError(f"Cannot read image: {image_path}")
         h, w = img.shape[:2]
+        log.debug(f"Inpaint input: {image_path} ({w}x{h}), {len(boxes)} box(es)")
 
         # Full-page text mask; falls back to Otsu when missing/empty.
         page_mask = None
@@ -129,7 +130,9 @@ class LamaMangaModel(BaseInpaintModel):
                 if len(ins) > 1:
                     feed[ins[1].name] = mask_blob
 
+            log.debug(f"Inpaint box {i}: crop({x1-x0}x{y1-y0}) feed{[(k, list(v.shape)) for k, v in feed.items()]}")
             output = np.asarray(session.run(None, feed)[0])[0]  # CHW
+            log.debug(f"Inpaint box {i}: output{list(output.shape)}")
             patch = pp.compose_patch(output, mask, nw, nh, pad_x, pad_y, box_rect, clamp=_has_neighbor(i))
 
             patch_path = output_dir / f"patch_{i:03d}.png"

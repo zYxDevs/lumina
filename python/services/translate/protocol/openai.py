@@ -19,6 +19,7 @@ def chat(
     json_mode: bool = False,
 ) -> str:
     log.debug(f"LLM chat request: {base_url} model={model}")
+    log.debug(f"LLM system prompt: {system[:200]}{'...' if len(system) > 200 else ''}")
     client = OpenAI(
         base_url=base_url.rstrip("/"),
         # Local servers (Ollama, LM Studio, ...) accept any placeholder key

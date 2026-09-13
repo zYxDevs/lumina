@@ -5,6 +5,7 @@ import cv2 as cv
 import numpy as np
 
 from .config import OUTPUT_SCALE
+from utils.logger import log
 
 
 def compose_patch(
@@ -42,4 +43,6 @@ def compose_patch(
         alpha[:, :bx0] = 0
         alpha[:, bx1:] = 0
 
-    return np.dstack([result, alpha])
+    patch = np.dstack([result, alpha])
+    log.debug(f"compose_patch: output{list(output.shape)} -> patch{list(patch.shape)}")
+    return patch

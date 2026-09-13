@@ -22,13 +22,16 @@ class RTDetrModel(BaseDetectModel):
     def detect(self, image_path: str) -> dict:
         session = self._load_session()
 
+        log.debug(f"Detect input: {image_path}")
         tensor, w, h = prep.preprocess(image_path)
         # Second input = original size; graph then outputs boxes in absolute pixels
         feed = {
             "images": tensor,
             "orig_target_sizes": np.array([[w, h]], dtype=np.int64),
         }
+        log.debug(f"Feed: {[(k, list(v.shape)) for k, v in feed.items()]}")
         outputs = [np.asarray(o) for o in session.run(None, feed)]
+        log.debug(f"ONNX outputs: {[list(o.shape) for o in outputs]}")
 
         labels, boxes, scores = pp.split_outputs(session, outputs)
         result = pp.postprocess(labels, boxes, scores, w, h)

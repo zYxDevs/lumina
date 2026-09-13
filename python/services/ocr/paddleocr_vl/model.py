@@ -45,7 +45,7 @@ class PaddleOcrVlModel(BaseOcrModel):
     def _load(self) -> None:
         if self._vis is not None:
             return
-        log.info("Loading PaddleOCR-VL ONNX (this takes a moment)...")
+        log.debug("Loading PaddleOCR-VL ONNX (this takes a moment)...")
         self._vis = VisionEncoder(self.model_dir)
         self._dec = Decoder(self.model_dir)
         cfg = json.loads(
@@ -97,7 +97,8 @@ class PaddleOcrVlModel(BaseOcrModel):
 
     def _ocr_region(self, img, box: dict) -> str:
         """Vision encode + decode on one crop."""
-        vis, dec = self._vis, self._dec
+        vis = self._vis
+        dec = self._dec
         assert vis is not None and dec is not None
         crop = self._crop_for_ocr(img, box)
         pixel_values, grid = preprocess_region(
