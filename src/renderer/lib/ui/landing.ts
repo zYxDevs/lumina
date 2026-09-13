@@ -175,8 +175,12 @@ export function show(): void {
   if (!_root) return;
   void _render();
   _root.style.display = "flex";
+  const strip = document.getElementById("page-strip");
+  if (strip) strip.classList.add("hidden");
 }
 
 export function hide(): void {
   if (_root) _root.style.display = "none";
+  const strip = document.getElementById("page-strip");
+  if (strip) strip.classList.remove("hidden");
 }

@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Frontend codebase refactor.** All TypeScript renderer code reorganized for maintainability — files grouped into logical folders, filenames standardized to kebab-case, and comments simplified to short JSDoc.
 - **Global font size is session-only.** Font size no longer persists across app restarts — it always resets to auto-fit. Per-layer font sizes are unaffected.
 - **Font size preset menu includes Auto.** The size dropdown now has an "Auto" option to reset back to box-fitted sizing.
+- **Page strip always visible.** The bottom page strip no longer hides when only 1 page is open. Scrolls to active page automatically when many pages overflow.
 
 ## [0.3.4] - 08-09-2026
 

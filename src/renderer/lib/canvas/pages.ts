@@ -20,12 +20,6 @@ canvas.renderPageStrip = function (): void {
   const items = document.getElementById("page-strip-items");
   if (!strip || !items) return;
 
-  if (state.pages.length <= 1) {
-    strip.classList.add("hidden");
-    return;
-  }
-
-  strip.classList.remove("hidden");
   items.innerHTML = "";
 
   state.pages.forEach(function (page, i) {
@@ -91,6 +85,12 @@ canvas.renderPageStrip = function (): void {
     attrs: {},
     root: addBtn.parentElement as HTMLElement,
   });
+
+  // Scroll active thumbnail into view when there are many pages.
+  const active = items.querySelector<HTMLElement>(".page-thumb.active");
+  if (active) {
+    active.scrollIntoView({ inline: "center", block: "nearest" });
+  }
 };
 
 /** Set by renderer entry — avoids circular import */
