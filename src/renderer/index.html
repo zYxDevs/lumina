@@ -32,64 +32,142 @@
     <link rel="stylesheet" href="styles/app.css" />
   </head>
   <body
-    class="bg-surface-0 text-text-secondary h-screen flex flex-col overflow-hidden text-xs font-sans select-none p-1.5 gap-1.5"
+    class="bg-surface-0 text-text-secondary h-screen flex flex-col overflow-hidden text-xs font-sans select-none px-1.5 pb-1.5 pt-0 gap-1.5"
   >
     <!-- Header -->
     <header
-      class="card card-raised flex items-center px-3 h-8 flex-shrink-0 gap-2"
+      class="card card-raised flex items-center pl-3 h-8 flex-shrink-0 gap-2 drag-region rounded-t-none relative"
     >
       <h1 class="text-[0.85rem] text-lumina font-bold tracking-tight">
         Lumina
       </h1>
-      <div class="flex gap-1.5 items-center">
-        <button class="btn" id="btn-open" data-i18n-title="header.open">
-          <i data-lucide="folder-open" class="w-3 h-3"></i>
-        </button>
-        <button
-          class="btn"
-          id="btn-save"
-          disabled
-          data-i18n-title="header.save"
-        >
-          <i data-lucide="save" class="w-3 h-3"></i>
-        </button>
-        <button
-          class="btn"
-          id="btn-save-as"
-          disabled
-          data-i18n-title="header.saveAs"
-        >
-          <i data-lucide="file-plus" class="w-3 h-3"></i>
-        </button>
-        <button
-          class="btn"
-          id="btn-export"
-          disabled
-          data-i18n-title="header.export"
-        >
-          <i data-lucide="image-down" class="w-3 h-3"></i>
-        </button>
-        <button
-          class="btn"
-          id="btn-export-all"
-          disabled
-          data-i18n-title="header.exportAll"
-        >
-          <i data-lucide="images" class="w-3 h-3"></i>
-        </button>
-      </div>
+
+      <!-- Menu Bar -->
+      <nav class="flex items-center gap-0.5 ml-1" id="menu-bar">
+        <!-- File Menu -->
+        <div class="menu-wrap" id="menu-file-wrap">
+          <button class="menu-trigger" id="menu-file-trigger">File</button>
+          <div class="menu-dropdown hidden" id="menu-file-dropdown">
+            <button class="menu-item" id="btn-open">
+              <span class="menu-item-icon"
+                ><i data-lucide="folder-open" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="header.open"
+                >Open...</span
+              >
+              <span class="menu-item-shortcut">Ctrl+O</span>
+            </button>
+            <button class="menu-item" id="btn-import">
+              <span class="menu-item-icon"
+                ><i data-lucide="file-plus" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="header.import"
+                >Import Page...</span
+              >
+              <span class="menu-item-shortcut">Ctrl+I</span>
+            </button>
+            <div class="menu-sep"></div>
+            <button class="menu-item" id="btn-save" disabled>
+              <span class="menu-item-icon"
+                ><i data-lucide="save" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="header.save"
+                >Save Project</span
+              >
+              <span class="menu-item-shortcut">Ctrl+S</span>
+            </button>
+            <button class="menu-item" id="btn-save-as" disabled>
+              <span class="menu-item-icon"
+                ><i data-lucide="save" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="header.saveAs"
+                >Save Project As...</span
+              >
+              <span class="menu-item-shortcut">Ctrl+Shift+S</span>
+            </button>
+            <div class="menu-sep"></div>
+            <button class="menu-item" id="btn-export" disabled>
+              <span class="menu-item-icon"
+                ><i data-lucide="image-down" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="header.export"
+                >Export Current Image</span
+              >
+              <span class="menu-item-shortcut">Ctrl+E</span>
+            </button>
+            <button class="menu-item" id="btn-export-all" disabled>
+              <span class="menu-item-icon"
+                ><i data-lucide="images" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="header.exportAll"
+                >Export All Pages</span
+              >
+              <span class="menu-item-shortcut">Ctrl+Shift+E</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Edit Menu -->
+        <div class="menu-wrap" id="menu-edit-wrap">
+          <button class="menu-trigger" id="menu-edit-trigger">Edit</button>
+          <div class="menu-dropdown hidden" id="menu-edit-dropdown">
+            <button class="menu-item" id="btn-undo" disabled>
+              <span class="menu-item-icon"
+                ><i data-lucide="undo-2" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="header.undo">Undo</span>
+              <span class="menu-item-shortcut">Ctrl+Z</span>
+            </button>
+            <button class="menu-item" id="btn-redo" disabled>
+              <span class="menu-item-icon"
+                ><i data-lucide="redo-2" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="header.redo">Redo</span>
+              <span class="menu-item-shortcut">Ctrl+Y</span>
+            </button>
+            <div class="menu-sep"></div>
+            <button class="menu-item" id="menu-settings">
+              <span class="menu-item-icon"
+                ><i data-lucide="settings" class="w-3.5 h-3.5"></i
+              ></span>
+              <span class="menu-item-label" data-i18n="settings.title"
+                >Preferences / Settings</span
+              >
+              <span class="menu-item-shortcut">Ctrl+,</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
       <div id="paint-options" class="hidden paint-options">
         <label class="paint-opt paint-opt-color" title="Color">
           <span class="paint-opt-label" data-i18n="paint.color">Color</span>
           <input type="color" id="paint-color" value="#111111" />
         </label>
-        <label class="paint-opt paint-opt-size" title="Size">
-          <span class="paint-opt-label" data-i18n="paint.size">Size</span>
+        <div class="paint-opt paint-opt-size" title="Size">
+          <label for="paint-size" class="paint-opt-label" data-i18n="paint.size"
+            >Size</label
+          >
           <input type="range" id="paint-size" min="2" max="300" value="24" />
-          <span class="paint-opt-value" id="paint-size-value">24</span>
-        </label>
-        <label class="paint-opt paint-opt-opacity" title="Opacity">
-          <span class="paint-opt-label" data-i18n="paint.opacity">Opacity</span>
+          <div class="paint-opt-val-wrap">
+            <input
+              type="number"
+              class="paint-opt-input"
+              id="paint-size-value"
+              min="2"
+              max="300"
+              value="24"
+            />
+            <span class="paint-opt-unit">px</span>
+          </div>
+        </div>
+        <div class="paint-opt paint-opt-opacity" title="Opacity">
+          <label
+            for="paint-opacity"
+            class="paint-opt-label"
+            data-i18n="paint.opacity"
+            >Opacity</label
+          >
           <input
             type="range"
             id="paint-opacity"
@@ -97,11 +175,24 @@
             max="100"
             value="100"
           />
-          <span class="paint-opt-value" id="paint-opacity-value">100%</span>
-        </label>
-        <label class="paint-opt paint-opt-hardness" title="Hardness">
-          <span class="paint-opt-label" data-i18n="paint.hardness"
-            >Hardness</span
+          <div class="paint-opt-val-wrap">
+            <input
+              type="number"
+              class="paint-opt-input"
+              id="paint-opacity-value"
+              min="0"
+              max="100"
+              value="100"
+            />
+            <span class="paint-opt-unit">%</span>
+          </div>
+        </div>
+        <div class="paint-opt paint-opt-hardness" title="Hardness">
+          <label
+            for="paint-hardness"
+            class="paint-opt-label"
+            data-i18n="paint.hardness"
+            >Hardness</label
           >
           <input
             type="range"
@@ -110,11 +201,24 @@
             max="100"
             value="50"
           />
-          <span class="paint-opt-value" id="paint-hardness-value">50%</span>
-        </label>
-        <label class="paint-opt paint-opt-tolerance" title="Tolerance">
-          <span class="paint-opt-label" data-i18n="paint.tolerance"
-            >Tolerance</span
+          <div class="paint-opt-val-wrap">
+            <input
+              type="number"
+              class="paint-opt-input"
+              id="paint-hardness-value"
+              min="0"
+              max="100"
+              value="50"
+            />
+            <span class="paint-opt-unit">%</span>
+          </div>
+        </div>
+        <div class="paint-opt paint-opt-tolerance" title="Tolerance">
+          <label
+            for="paint-tolerance"
+            class="paint-opt-label"
+            data-i18n="paint.tolerance"
+            >Tolerance</label
           >
           <input
             type="range"
@@ -123,8 +227,17 @@
             max="255"
             value="32"
           />
-          <span class="paint-opt-value" id="paint-tolerance-value">32</span>
-        </label>
+          <div class="paint-opt-val-wrap">
+            <input
+              type="number"
+              class="paint-opt-input"
+              id="paint-tolerance-value"
+              min="0"
+              max="255"
+              value="32"
+            />
+          </div>
+        </div>
         <label class="paint-opt paint-opt-contiguous" title="Contiguous">
           <input type="checkbox" id="paint-contiguous" checked />
           <span data-i18n="paint.contiguous">Contiguous</span>
@@ -141,7 +254,16 @@
           <i data-lucide="rotate-ccw"></i>
         </button>
       </div>
-      <span class="w-px h-4 bg-surface-3"></span>
+
+      <!-- Header Dynamic Island (Status & Notification Capsule) -->
+      <div id="dynamic-island" class="dynamic-island hidden">
+        <div class="dynamic-island-content">
+          <i class="dynamic-island-icon" data-lucide="info"></i>
+          <span class="dynamic-island-text" id="dynamic-island-text"></span>
+        </div>
+        <div class="dynamic-island-actions" id="dynamic-island-actions"></div>
+      </div>
+
       <div class="flex gap-1.5 ml-auto items-center">
         <button
           class="btn relative"
@@ -155,31 +277,6 @@
             title=""
           ></span>
         </button>
-        <button class="btn" id="btn-import" data-i18n="header.import">
-          <span class="flex items-center gap-1"
-            ><i data-lucide="folder-open" class="w-3 h-3"></i> Import</span
-          >
-        </button>
-        <span class="w-px h-4 bg-surface-3"></span>
-        <button
-          class="btn"
-          id="btn-undo"
-          disabled
-          data-i18n-title="header.undo"
-        >
-          <i data-lucide="undo-2" class="w-3 h-3"></i>
-        </button>
-        <button
-          class="btn"
-          id="btn-redo"
-          disabled
-          data-i18n-title="header.redo"
-        >
-          <i data-lucide="redo-2" class="w-3 h-3"></i>
-        </button>
-        <button class="btn" id="btn-settings" data-i18n-title="settings.title">
-          <i data-lucide="settings" class="w-3 h-3"></i>
-        </button>
         <button
           class="btn"
           id="btn-models"
@@ -188,37 +285,16 @@
         >
           <i data-lucide="alert-triangle" class="w-3 h-3 text-[#ffb74d]"></i>
         </button>
-        <button class="btn primary" id="btn-detect" disabled>
-          <span class="flex items-center gap-1"
-            ><i data-lucide="scan" class="w-3 h-3"></i>
-            <span data-i18n="header.detect">Detect</span></span
-          >
-        </button>
-        <button class="btn primary" id="btn-ocr" disabled>
-          <span class="flex items-center gap-1"
-            ><i data-lucide="scan-text" class="w-3 h-3"></i>
-            <span data-i18n="header.ocr">OCR</span></span
-          >
-        </button>
-        <button class="btn primary" id="btn-translate" disabled>
-          <span class="flex items-center gap-1"
-            ><i data-lucide="languages" class="w-3 h-3"></i>
-            <span data-i18n="header.translate">Translate</span></span
-          >
-        </button>
-        <button class="btn primary" id="btn-inpaint" disabled>
-          <span class="flex items-center gap-1"
-            ><i data-lucide="eraser" class="w-3 h-3"></i>
-            <span data-i18n="header.inpaint">Inpaint</span></span
-          >
-        </button>
         <button
-          class="btn"
-          id="btn-toggle-boxes"
-          disabled
-          data-i18n-title="header.toggleBoxes"
+          class="btn hidden"
+          id="btn-pipeline-restore"
+          title="Show Pipeline Toolbar"
         >
-          <i data-lucide="eye" class="w-3 h-3"></i>
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-lumina"></i>
+          <span class="text-xs font-medium">Pipeline</span>
+        </button>
+        <button class="btn" id="btn-settings" data-i18n-title="settings.title">
+          <i data-lucide="settings" class="w-3 h-3"></i>
         </button>
       </div>
     </header>
@@ -242,6 +318,147 @@
         >
           <!-- Landing (welcome screen — content built by lib/landing.ts) -->
           <div id="landing" class="z-10"></div>
+
+          <!-- Floating Draggable Pipeline Bar -->
+          <div id="pipeline-bar" class="pipeline-bar hidden">
+            <div class="pipeline-bar-pill">
+              <!-- Drag Handle -->
+              <div class="pipeline-drag-handle" title="Drag to move">
+                <i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i>
+              </div>
+
+              <!-- Detect Action + Expandable Model Selector -->
+              <div class="pipeline-group" data-kind="detect">
+                <button
+                  class="pipeline-btn"
+                  id="btn-detect"
+                  disabled
+                  title="Detect text"
+                >
+                  <i data-lucide="scan" class="w-3.5 h-3.5"></i>
+                  <span data-i18n="header.detect">Detect</span>
+                </button>
+                <button
+                  class="pipeline-chevron"
+                  id="btn-detect-model"
+                  title="Select Detect Model"
+                >
+                  <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
+                <div
+                  class="pipeline-dropdown hidden"
+                  id="dropdown-detect"
+                ></div>
+              </div>
+
+              <!-- OCR Action + Expandable Model Selector -->
+              <div class="pipeline-group" data-kind="ocr">
+                <button
+                  class="pipeline-btn"
+                  id="btn-ocr"
+                  disabled
+                  title="Run OCR"
+                >
+                  <i data-lucide="scan-text" class="w-3.5 h-3.5"></i>
+                  <span data-i18n="header.ocr">OCR</span>
+                </button>
+                <button
+                  class="pipeline-chevron"
+                  id="btn-ocr-model"
+                  title="Select OCR Model"
+                >
+                  <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
+                <div class="pipeline-dropdown hidden" id="dropdown-ocr"></div>
+              </div>
+
+              <!-- Translate Action + Expandable Model Selector -->
+              <div class="pipeline-group" data-kind="translate">
+                <button
+                  class="pipeline-btn"
+                  id="btn-translate"
+                  disabled
+                  title="Translate text"
+                >
+                  <i data-lucide="languages" class="w-3.5 h-3.5"></i>
+                  <span data-i18n="header.translate">Translate</span>
+                </button>
+                <button
+                  class="pipeline-chevron"
+                  id="btn-translate-model"
+                  title="Select Translation Provider"
+                >
+                  <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
+                <div
+                  class="pipeline-dropdown hidden"
+                  id="dropdown-translate"
+                ></div>
+              </div>
+
+              <!-- Inpaint Action + Expandable Model Selector -->
+              <div class="pipeline-group" data-kind="inpaint">
+                <button
+                  class="pipeline-btn"
+                  id="btn-inpaint"
+                  disabled
+                  title="Inpaint text boxes"
+                >
+                  <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
+                  <span data-i18n="header.inpaint">Inpaint</span>
+                </button>
+                <button
+                  class="pipeline-chevron"
+                  id="btn-inpaint-model"
+                  title="Select Inpaint Model"
+                >
+                  <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
+                <div
+                  class="pipeline-dropdown hidden"
+                  id="dropdown-inpaint"
+                ></div>
+              </div>
+
+              <div class="pipeline-sep"></div>
+
+              <!-- Run All -->
+              <button
+                class="pipeline-btn pipeline-btn-all"
+                id="btn-pipeline-all"
+                title="Run all pipeline steps in sequence"
+              >
+                <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                <span>Run All</span>
+              </button>
+
+              <!-- Toggle Boxes -->
+              <button
+                class="pipeline-icon-btn"
+                id="btn-toggle-boxes"
+                disabled
+                data-i18n-title="header.toggleBoxes"
+              >
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              </button>
+
+              <!-- Minimize Toggle -->
+              <button
+                class="pipeline-icon-btn"
+                id="btn-pipeline-minimize"
+                title="Minimize toolbar"
+              >
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <!-- Pipeline Docked Sub-Capsule -->
+            <div id="pipeline-sub-capsule" class="pipeline-sub-capsule hidden">
+              <i class="sub-capsule-icon" data-lucide="info"></i>
+              <span class="sub-capsule-text" id="pipeline-sub-text"></span>
+              <div class="sub-capsule-actions" id="pipeline-sub-actions"></div>
+            </div>
+          </div>
 
           <!-- Single Konva container -->
           <div id="canvas-container" class="absolute inset-0"></div>
@@ -303,11 +520,11 @@
              butts against the sidebar; the sidebar stays full height. -->
         <div
           id="page-strip"
-          class="card h-[68px] flex-shrink-0 overflow-x-auto custom-scrollbar"
+          class="flex-shrink-0 overflow-x-auto custom-scrollbar hidden"
         >
           <div
             id="page-strip-items"
-            class="flex gap-1 p-1.5 h-full items-center"
+            class="flex gap-2 px-3 py-2 h-full items-center"
           ></div>
         </div>
       </div>

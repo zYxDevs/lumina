@@ -17,8 +17,12 @@ export function wireSlider(el: HTMLInputElement): void {
     setSliderFill(el);
     if (label) {
       const v = el.value;
-      label.textContent =
-        el.getAttribute("data-suffix") === "percent" ? v + "%" : v;
+      if (label instanceof HTMLInputElement) {
+        label.value = v;
+      } else {
+        label.textContent =
+          el.getAttribute("data-suffix") === "percent" ? v + "%" : v;
+      }
     }
   };
   setSliderFill(el);

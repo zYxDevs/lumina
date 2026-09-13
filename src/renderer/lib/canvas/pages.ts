@@ -28,6 +28,7 @@ canvas.renderPageStrip = function (): void {
       "page-thumb" + (i === state.activePageIdx ? " active" : "");
     thumb.title = page.fileName;
     thumb.dataset.pageIdx = String(i);
+    thumb.draggable = true;
 
     // Create thumbnail image — downscaled data URL, never the full-res file
     const img = document.createElement("img");
@@ -35,28 +36,68 @@ canvas.renderPageStrip = function (): void {
     img.alt = page.fileName;
     thumb.appendChild(img);
 
-    // Page number label
+    // Page number label chip
     const num = document.createElement("div");
     num.className = "page-num";
     num.textContent = String(i + 1);
     thumb.appendChild(num);
 
-    // Delete button (shown on hover)
+    // Layers count badge (if any text/dialogue layers created)
+    if (page.layers && page.layers.length > 0) {
+      const badge = document.createElement("div");
+      badge.className = "page-badge";
+      badge.textContent = String(page.layers.length);
+      badge.title = `${page.layers.length} layer(s)`;
+      thumb.appendChild(badge);
+    }
+
+    // Delete button (sleek hover button)
     const del = document.createElement("div");
-    del.className =
-      "absolute top-0 right-0 w-3.5 h-3.5 bg-red-600 rounded-bl rounded-tr-sm cursor-pointer hidden items-center justify-center text-white text-[8px] leading-none hover:bg-red-500";
-    del.textContent = "×";
+    del.className = "page-del-btn";
+    del.innerHTML = '<i data-lucide="x" class="w-2.5 h-2.5"></i>';
     del.title = i18n.t("pages.remove");
-    thumb.appendChild(del);
-    thumb.addEventListener("mouseenter", function () {
-      del.style.display = "flex";
-    });
-    thumb.addEventListener("mouseleave", function () {
-      del.style.display = "none";
-    });
     del.addEventListener("click", function (e) {
       e.stopPropagation();
       canvas.removePage(i);
+    });
+    thumb.appendChild(del);
+
+    // Drag and Drop reordering
+    thumb.addEventListener("dragstart", function (e) {
+      if (e.dataTransfer) {
+        e.dataTransfer.setData("text/plain", String(i));
+        e.dataTransfer.effectAllowed = "move";
+      }
+      thumb.classList.add("dragging");
+    });
+
+    thumb.addEventListener("dragend", function () {
+      thumb.classList.remove("dragging");
+      const dropTargets = items.querySelectorAll(".page-thumb.drag-over");
+      dropTargets.forEach((el) => el.classList.remove("drag-over"));
+    });
+
+    thumb.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = "move";
+      }
+      if (!thumb.classList.contains("dragging")) {
+        thumb.classList.add("drag-over");
+      }
+    });
+
+    thumb.addEventListener("dragleave", function () {
+      thumb.classList.remove("drag-over");
+    });
+
+    thumb.addEventListener("drop", function (e) {
+      e.preventDefault();
+      thumb.classList.remove("drag-over");
+      if (!e.dataTransfer) return;
+      const fromIdx = parseInt(e.dataTransfer.getData("text/plain"), 10);
+      if (isNaN(fromIdx) || fromIdx === i) return;
+      canvas.reorderPage(fromIdx, i);
     });
 
     // Click to switch page
@@ -69,10 +110,12 @@ canvas.renderPageStrip = function (): void {
 
   // Add "+" button at the end
   const addBtn = document.createElement("div");
-  addBtn.className =
-    "page-thumb flex items-center justify-center bg-surface-3 text-text-muted hover:text-text-secondary cursor-pointer";
+  addBtn.className = "page-thumb-add";
   addBtn.title = i18n.t("pages.importMore");
-  addBtn.innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i>';
+  addBtn.innerHTML = `
+    <i data-lucide="plus" class="w-4 h-4"></i>
+    <span class="text-[8px] font-semibold opacity-70 tracking-wider">ADD</span>
+  `;
   addBtn.addEventListener("click", function () {
     if (rendererRef && rendererRef.importImages) {
       rendererRef.importImages();
@@ -83,14 +126,41 @@ canvas.renderPageStrip = function (): void {
   createIcons({
     nameAttr: "data-lucide",
     attrs: {},
-    root: addBtn.parentElement as HTMLElement,
+    root: items,
   });
 
   // Scroll active thumbnail into view when there are many pages.
   const active = items.querySelector<HTMLElement>(".page-thumb.active");
   if (active) {
-    active.scrollIntoView({ inline: "center", block: "nearest" });
+    active.scrollIntoView({
+      inline: "center",
+      block: "nearest",
+      behavior: "smooth",
+    });
   }
+};
+
+/** Reorder page from one index to another */
+canvas.reorderPage = function (fromIdx: number, toIdx: number): void {
+  if (
+    fromIdx === toIdx ||
+    fromIdx < 0 ||
+    fromIdx >= state.pages.length ||
+    toIdx < 0 ||
+    toIdx >= state.pages.length
+  ) {
+    return;
+  }
+  const activePage = state.getActivePage();
+  const [moved] = state.pages.splice(fromIdx, 1);
+  state.pages.splice(toIdx, 0, moved);
+
+  if (activePage) {
+    state.activePageIdx = state.pages.indexOf(activePage);
+  }
+  markDirty();
+  canvas.renderPageStrip();
+  ui.updatePageIndicator();
 };
 
 /** Set by renderer entry — avoids circular import */

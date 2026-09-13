@@ -9,10 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Fresh UI redesign.** Compact top menu bar (File/Edit dropdowns), frameless window with native title bar controls (minimize/maximize/close), floating draggable pipeline pill with inline model selectors, header dynamic island, docked sub-capsule notifications with one-click error copying, direct numeric inputs for paint tools, bottom gallery dock with drag-and-drop page reordering, refined glassmorphic Settings & Export modals, minimal welcome landing screen, and modern context menus.
+- **Typography inspector redesign & font preview.** Redesigned type section controls (custom color swatch inputs, segmented alignment, glassmorphic steppers) and live font family rendering in the font picker dropdown and trigger.
 - **Layer list: double-click to edit.** Single-click now only selects the layer; double-click expands the inline editor (textarea). Applies to both sidebar rows and canvas text-node double-clicks.
 
 ### Fixed
 
+- **Modal overlays render above floating pipeline bar.** Increased overlay z-index so Settings, Export, and progress dialogs cleanly layer over the draggable pipeline bar.
 - **Masks now visible in export preview.** Previously, the export window only showed text layers — inpaint and cleanup masks were missing because mask images weren't loaded before compositing.
 - **Undo/redo no longer flickers.** Mask images are now preserved across snapshots when the file path hasn't changed, eliminating the 1-frame flash of the bare background during undo/redo.
 - **Eraser tool now responds immediately during drag.** Previously the eraser appeared delayed because the blit fast-path (source-over) couldn't reflect erased pixels — it now re-composites the affected region so visual feedback is instant.

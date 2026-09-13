@@ -1,6 +1,7 @@
 /** Minimal centered welcome screen with recents list. */
 import * as i18n from "../i18n";
 import { createIcons } from "./icons";
+import { pipelineBar } from "./pipeline-bar";
 import type { RecentsData } from "../../types";
 
 export interface LandingHandlers {
@@ -55,7 +56,7 @@ function _grid(
           ? '<div class="landing-thumb" style="background-image:url(\'' +
             _fileUrl(e.path) +
             "')\"></div>"
-          : '<div class="landing-thumb landing-thumb-project"><i data-lucide="package"></i></div>';
+          : '<div class="landing-thumb landing-thumb-project"><i data-lucide="folder"></i></div>';
       return (
         '<div class="landing-grid-item" data-kind="' +
         kind +
@@ -72,7 +73,7 @@ function _grid(
         _esc(i18n.t("landing.remove")) +
         '" data-remove="' +
         _esc(e.path) +
-        '"><i data-lucide="x"></i></button>' +
+        '"><i data-lucide="x" class="w-3 h-3"></i></button>' +
         "</div>"
       );
     })
@@ -177,10 +178,12 @@ export function show(): void {
   _root.style.display = "flex";
   const strip = document.getElementById("page-strip");
   if (strip) strip.classList.add("hidden");
+  pipelineBar.hide();
 }
 
 export function hide(): void {
   if (_root) _root.style.display = "none";
   const strip = document.getElementById("page-strip");
   if (strip) strip.classList.remove("hidden");
+  pipelineBar.show();
 }

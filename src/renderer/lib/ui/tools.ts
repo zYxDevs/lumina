@@ -4,6 +4,7 @@ import * as i18n from "../i18n";
 import { canvas } from "../canvas/index";
 import { createIcons } from "./icons";
 import { paintSettings, setPaintSize } from "../canvas/tools/paint/shared";
+import { setSliderFill } from "./slider";
 
 interface ToolItem {
   id:
@@ -102,7 +103,16 @@ export const tools = {
     const el = document.getElementById("paint-options");
     const sizeInput = el?.querySelector<HTMLInputElement>("#paint-size");
     const label = el?.querySelector<HTMLElement>("#paint-size-value");
-    if (sizeInput) sizeInput.value = String(paintSettings().size);
-    if (label) label.textContent = String(paintSettings().size);
+    if (sizeInput) {
+      sizeInput.value = String(paintSettings().size);
+      setSliderFill(sizeInput);
+    }
+    if (label) {
+      if (label instanceof HTMLInputElement) {
+        label.value = String(Math.round(paintSettings().size));
+      } else {
+        label.textContent = String(Math.round(paintSettings().size));
+      }
+    }
   },
 };

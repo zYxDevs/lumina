@@ -10,4 +10,10 @@ export const pipeline = {
   runOcr: ocr.run,
   runTranslate: translate.run,
   runInpaint: inpaint.run,
+  async runAll(): Promise<void> {
+    await detection.run();
+    await ocr.run();
+    await translate.run();
+    await inpaint.run();
+  },
 };

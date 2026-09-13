@@ -241,28 +241,41 @@ export function syncOptionsBar(tool: string): void {
     size.value = String(s.size);
     setSliderFill(size);
     const l = el.querySelector<HTMLElement>("#paint-size-value");
-    if (l) l.textContent = String(Math.round(s.size));
+    if (l) {
+      if (l instanceof HTMLInputElement) l.value = String(Math.round(s.size));
+      else l.textContent = String(Math.round(s.size));
+    }
   }
   const opacity = el.querySelector<HTMLInputElement>("#paint-opacity");
   if (opacity) {
-    opacity.value = String(Math.round(s.opacity * 100));
+    const opPct = Math.round(s.opacity * 100);
+    opacity.value = String(opPct);
     setSliderFill(opacity);
     const l = el.querySelector<HTMLElement>("#paint-opacity-value");
-    if (l) l.textContent = Math.round(s.opacity * 100) + "%";
+    if (l) {
+      if (l instanceof HTMLInputElement) l.value = String(opPct);
+      else l.textContent = opPct + "%";
+    }
   }
   const hardness = el.querySelector<HTMLInputElement>("#paint-hardness");
   if (hardness) {
     hardness.value = String(s.hardness);
     setSliderFill(hardness);
     const l = el.querySelector<HTMLElement>("#paint-hardness-value");
-    if (l) l.textContent = s.hardness + "%";
+    if (l) {
+      if (l instanceof HTMLInputElement) l.value = String(s.hardness);
+      else l.textContent = s.hardness + "%";
+    }
   }
   const tolerance = el.querySelector<HTMLInputElement>("#paint-tolerance");
   if (tolerance) {
     tolerance.value = String(s.tolerance);
     setSliderFill(tolerance);
     const l = el.querySelector<HTMLElement>("#paint-tolerance-value");
-    if (l) l.textContent = String(s.tolerance);
+    if (l) {
+      if (l instanceof HTMLInputElement) l.value = String(s.tolerance);
+      else l.textContent = String(s.tolerance);
+    }
   }
   const contiguous = el.querySelector<HTMLInputElement>("#paint-contiguous");
   if (contiguous) contiguous.checked = s.contiguous;

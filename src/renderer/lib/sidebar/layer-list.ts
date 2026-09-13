@@ -183,7 +183,7 @@ function layerRowHTML(page: Page, layer: PageLayer, idx: number): string {
       : "") +
     '<button class="det-btn det-btn-danger" data-action="delete" draggable="false" title="' +
     esc(i18n.t("sidebar.delete")) +
-    '">✕</button>' +
+    '"><i data-lucide="x"></i></button>' +
     "</div>" +
     '<button class="layer-eye" data-action="toggle-visible" draggable="false" title="' +
     esc(i18n.t("layers.toggleVisible")) +

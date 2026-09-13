@@ -11,16 +11,53 @@ import {
 } from "./shared";
 import { clearSprite } from "./strokes";
 import { syncOptionsBar } from ".";
-import { wireSlider } from "../../../ui/slider";
+import { wireSlider, setSliderFill } from "../../../ui/slider";
 import { state } from "../../../state";
+
+function bindNumericInput(
+  input: HTMLInputElement,
+  slider: HTMLInputElement | null,
+  min: number,
+  max: number,
+  onChange: (val: number) => void,
+): void {
+  const commit = function (): void {
+    let v = parseFloat(input.value);
+    if (isNaN(v)) v = min;
+    const clamped = Math.min(max, Math.max(min, Math.round(v)));
+    input.value = String(clamped);
+    if (slider) {
+      slider.value = String(clamped);
+      setSliderFill(slider);
+    }
+    onChange(clamped);
+  };
+
+  input.addEventListener("input", function () {
+    const v = parseFloat(input.value);
+    if (!isNaN(v)) {
+      const clamped = Math.min(max, Math.max(min, Math.round(v)));
+      if (slider) {
+        slider.value = String(clamped);
+        setSliderFill(slider);
+      }
+      onChange(clamped);
+    }
+  });
+
+  input.addEventListener("change", commit);
+  input.addEventListener("blur", commit);
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      commit();
+      input.blur();
+    }
+  });
+}
 
 export function initPaintOptions(): void {
   const el = document.getElementById("paint-options");
   if (!el) return;
-
-  const label = function (id: string): HTMLElement | null {
-    return el.querySelector<HTMLElement>("#" + id + "-value");
-  };
 
   const color = el.querySelector<HTMLInputElement>("#paint-color");
   if (color) {
@@ -31,46 +68,77 @@ export function initPaintOptions(): void {
   }
 
   const size = el.querySelector<HTMLInputElement>("#paint-size");
+  const sizeVal = el.querySelector<HTMLInputElement>("#paint-size-value");
   if (size) {
     size.addEventListener("input", function () {
-      setPaintSize(parseInt(size.value, 10));
-      const l = label("paint-size");
-      if (l) l.textContent = String(Math.round(paintSettings().size));
+      const v = parseInt(size.value, 10);
+      setPaintSize(v);
+      if (sizeVal) sizeVal.value = String(v);
       clearSprite();
     });
     wireSlider(size);
   }
+  if (sizeVal) {
+    bindNumericInput(sizeVal, size, 2, 300, function (v) {
+      setPaintSize(v);
+      clearSprite();
+    });
+  }
 
   const opacity = el.querySelector<HTMLInputElement>("#paint-opacity");
+  const opacityVal = el.querySelector<HTMLInputElement>("#paint-opacity-value");
   if (opacity) {
     opacity.addEventListener("input", function () {
-      setPaintOpacity(parseInt(opacity.value, 10) / 100);
-      const l = label("paint-opacity");
-      if (l) l.textContent = Math.round(paintSettings().opacity * 100) + "%";
+      const v = parseInt(opacity.value, 10);
+      setPaintOpacity(v / 100);
+      if (opacityVal) opacityVal.value = String(v);
       clearSprite();
     });
     wireSlider(opacity);
   }
+  if (opacityVal) {
+    bindNumericInput(opacityVal, opacity, 0, 100, function (v) {
+      setPaintOpacity(v / 100);
+      clearSprite();
+    });
+  }
 
   const hardness = el.querySelector<HTMLInputElement>("#paint-hardness");
+  const hardnessVal = el.querySelector<HTMLInputElement>(
+    "#paint-hardness-value",
+  );
   if (hardness) {
     hardness.addEventListener("input", function () {
-      setPaintHardness(parseInt(hardness.value, 10));
-      const l = label("paint-hardness");
-      if (l) l.textContent = paintSettings().hardness + "%";
+      const v = parseInt(hardness.value, 10);
+      setPaintHardness(v);
+      if (hardnessVal) hardnessVal.value = String(v);
       clearSprite();
     });
     wireSlider(hardness);
   }
+  if (hardnessVal) {
+    bindNumericInput(hardnessVal, hardness, 0, 100, function (v) {
+      setPaintHardness(v);
+      clearSprite();
+    });
+  }
 
   const tolerance = el.querySelector<HTMLInputElement>("#paint-tolerance");
+  const toleranceVal = el.querySelector<HTMLInputElement>(
+    "#paint-tolerance-value",
+  );
   if (tolerance) {
     tolerance.addEventListener("input", function () {
-      setPaintTolerance(parseInt(tolerance.value, 10));
-      const l = label("paint-tolerance");
-      if (l) l.textContent = String(paintSettings().tolerance);
+      const v = parseInt(tolerance.value, 10);
+      setPaintTolerance(v);
+      if (toleranceVal) toleranceVal.value = String(v);
     });
     wireSlider(tolerance);
+  }
+  if (toleranceVal) {
+    bindNumericInput(toleranceVal, tolerance, 0, 255, function (v) {
+      setPaintTolerance(v);
+    });
   }
 
   const contiguous = el.querySelector<HTMLInputElement>("#paint-contiguous");

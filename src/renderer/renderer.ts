@@ -32,6 +32,7 @@ import { project, handleCloseRequest } from "./lib/project";
 import * as exportModule from "./lib/export";
 import * as autosave from "./lib/project/autosave";
 import * as landing from "./lib/ui/landing";
+import { pipelineBar } from "./lib/ui/pipeline-bar";
 import { importImages, openImagePaths } from "./lib/project/page-loader";
 import { initAutoUpdate } from "./lib/ui/auto-update";
 import { updateDirtyUI, setDirtyListener } from "./lib/project/dirty";
@@ -49,8 +50,102 @@ function checkModels(): void {
   });
 }
 
+function initMenuBar(): void {
+  const menuBar = document.getElementById("menu-bar");
+  if (!menuBar) return;
+
+  let isAnyMenuOpen = false;
+
+  const closeMenus = () => {
+    isAnyMenuOpen = false;
+    document
+      .querySelectorAll(".menu-dropdown")
+      .forEach((d) => d.classList.add("hidden"));
+    document
+      .querySelectorAll(".menu-trigger")
+      .forEach((t) => t.classList.remove("active"));
+  };
+
+  const toggleMenu = (triggerId: string, dropdownId: string) => {
+    const dropdown = document.getElementById(dropdownId);
+    const trigger = document.getElementById(triggerId);
+    if (!dropdown || !trigger) return;
+
+    const isOpen = !dropdown.classList.contains("hidden");
+    closeMenus();
+
+    if (!isOpen) {
+      dropdown.classList.remove("hidden");
+      trigger.classList.add("active");
+      isAnyMenuOpen = true;
+    }
+  };
+
+  const openMenu = (triggerId: string, dropdownId: string) => {
+    const dropdown = document.getElementById(dropdownId);
+    const trigger = document.getElementById(triggerId);
+    if (!dropdown || !trigger) return;
+
+    closeMenus();
+    dropdown.classList.remove("hidden");
+    trigger.classList.add("active");
+    isAnyMenuOpen = true;
+  };
+
+  document
+    .getElementById("menu-file-trigger")
+    ?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu("menu-file-trigger", "menu-file-dropdown");
+    });
+
+  document
+    .getElementById("menu-edit-trigger")
+    ?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu("menu-edit-trigger", "menu-edit-dropdown");
+    });
+
+  document
+    .getElementById("menu-file-trigger")
+    ?.addEventListener("mouseenter", () => {
+      if (isAnyMenuOpen) openMenu("menu-file-trigger", "menu-file-dropdown");
+    });
+
+  document
+    .getElementById("menu-edit-trigger")
+    ?.addEventListener("mouseenter", () => {
+      if (isAnyMenuOpen) openMenu("menu-edit-trigger", "menu-edit-dropdown");
+    });
+
+  document.querySelectorAll(".menu-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      closeMenus();
+    });
+  });
+
+  document.getElementById("menu-settings")?.addEventListener("click", () => {
+    settings.open();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!(e.target as HTMLElement).closest("#menu-bar")) {
+      closeMenus();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeMenus();
+    }
+  });
+}
+
 // ── Init modules ──
 i18n.init().then(function () {
+  initMenuBar();
+  pipelineBar.init();
+
   // ── Landing welcome screen (recents + quick actions) ──
   landing.init({
     importImages: () => importImages(),

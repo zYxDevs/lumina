@@ -51,6 +51,15 @@ function _fontDisplayName(internal: string | null): string {
   return internal;
 }
 
+/** Internal font name → actual CSS font-family string */
+function _fontFamilyCss(internal: string | null): string {
+  if (!internal) return "";
+  for (const f of state.fontList || []) {
+    if (internalFontName(f.family) === internal) return f.family;
+  }
+  return internal;
+}
+
 // Single global document listener (registered once at module load) — closes
 // the open font picker on outside click / Escape. Element listeners die with
 // each sidebar rebuild; these module-level refs track the live menu.
@@ -238,7 +247,10 @@ export const typeSection = {
     };
     set("type-font", t.fontFamily || "");
     const trig = host.querySelector<HTMLButtonElement>("#type-font-trigger");
-    if (trig) trig.textContent = _fontDisplayName(t.fontFamily || null);
+    if (trig) {
+      trig.textContent = _fontDisplayName(t.fontFamily || null);
+      trig.style.fontFamily = _fontFamilyCss(t.fontFamily || null);
+    }
     set("type-color", t.color);
     set("type-size", t.fontSize === null ? "" : String(t.fontSize));
     set("type-weight", String(t.fontWeight));
@@ -325,6 +337,7 @@ export const typeSection = {
     trigger.id = "type-font-trigger";
     trigger.className = "field-select font-picker-trigger";
     trigger.textContent = _fontDisplayName(sel.value || null);
+    trigger.style.fontFamily = _fontFamilyCss(sel.value || null);
 
     // Floating panel (position:fixed, drag via title bar, resize:both)
     const panel = document.createElement("div");
@@ -395,12 +408,14 @@ export const typeSection = {
         const name = document.createElement("span");
         name.className = "font-picker-name";
         name.textContent = label;
+        if (family) name.style.fontFamily = family;
         b.appendChild(sample);
         b.appendChild(name);
         b.addEventListener("click", function () {
           if (sel.value !== value) {
             sel.value = value;
             trigger.textContent = _fontDisplayName(value || null);
+            trigger.style.fontFamily = _fontFamilyCss(value || null);
             typeSection._apply({ fontFamily: value || null });
             if (value) {
               const recents = loadRecentFonts();
@@ -826,6 +841,7 @@ export const typeSection = {
     if (!layer) {
       Object.assign(_globalType, patch);
       saveGlobalTypography(_globalType);
+      typeSection.refresh();
       return;
     }
     Object.assign(layer.typography, patch);

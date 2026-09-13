@@ -10,6 +10,13 @@ interface ToastEl extends HTMLDivElement {
   _timer?: ReturnType<typeof setTimeout> | null;
 }
 
+interface ActiveToastState {
+  msg: string;
+  type: ToastType;
+  duration: number;
+  endTime: number;
+}
+
 /** Format bytes as human-readable size */
 function _fmtSize(bytes: number): string {
   if (!bytes || bytes <= 0) return "";
@@ -21,6 +28,200 @@ function _fmtSize(bytes: number): string {
 
 /** Rolling window of samples for download speed estimate */
 let _dlSamples: Array<{ t: number; b: number }> = [];
+
+let _currentToast: ActiveToastState | null = null;
+let _toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+const toastIconNames: Record<ToastType, string> = {
+  info: "info",
+  warn: "alert-triangle",
+  error: "circle-x",
+  success: "circle-check",
+  running: "loader-2",
+};
+
+function _esc(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function hideDynamicIsland(immediate: boolean = false): void {
+  const island = document.getElementById("dynamic-island");
+  if (!island) return;
+  island.classList.remove("active");
+  if (immediate) {
+    island.classList.add("hidden");
+  } else {
+    setTimeout(() => {
+      if (!island.classList.contains("active")) {
+        island.classList.add("hidden");
+      }
+    }, 120);
+  }
+}
+
+function hidePipelineSubCapsule(immediate: boolean = false): void {
+  const capsule = document.getElementById("pipeline-sub-capsule");
+  if (!capsule) return;
+  capsule.classList.remove("active");
+  if (immediate) {
+    capsule.classList.add("hidden");
+  } else {
+    setTimeout(() => {
+      if (!capsule.classList.contains("active")) {
+        capsule.classList.add("hidden");
+      }
+    }, 120);
+  }
+}
+
+function renderDynamicIsland(msg: string, type: ToastType): void {
+  const island = document.getElementById("dynamic-island");
+  const actionsEl = document.getElementById("dynamic-island-actions");
+  if (!island || !actionsEl) return;
+
+  island.className = `dynamic-island active type-${type}`;
+  island.classList.remove("hidden");
+
+  const iconName = toastIconNames[type] || "info";
+  const iconWrap = island.querySelector<HTMLElement>(".dynamic-island-content");
+  if (iconWrap) {
+    iconWrap.innerHTML = `<i class="dynamic-island-icon" data-lucide="${iconName}"></i><span class="dynamic-island-text" id="dynamic-island-text">${_esc(msg)}</span>`;
+  }
+
+  actionsEl.innerHTML = "";
+  if (type === "error") {
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "dynamic-island-btn copy-btn";
+    copyBtn.title = "Copy error message";
+    copyBtn.innerHTML = '<i data-lucide="copy"></i><span>Copy</span>';
+    copyBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(msg).then(() => {
+          copyBtn.innerHTML =
+            '<i data-lucide="check" class="text-emerald-400"></i><span>Copied!</span>';
+          createIcons({ nameAttr: "data-lucide", attrs: {}, root: copyBtn });
+          setTimeout(() => {
+            copyBtn.innerHTML = '<i data-lucide="copy"></i><span>Copy</span>';
+            createIcons({ nameAttr: "data-lucide", attrs: {}, root: copyBtn });
+          }, 1500);
+        });
+      }
+    });
+    actionsEl.appendChild(copyBtn);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "dynamic-island-btn close-btn";
+    closeBtn.title = "Dismiss";
+    closeBtn.innerHTML = '<i data-lucide="x"></i>';
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      ui.dismissToast(null);
+    });
+    actionsEl.appendChild(closeBtn);
+  } else if (type !== "running") {
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "dynamic-island-btn close-btn";
+    closeBtn.title = "Dismiss";
+    closeBtn.innerHTML = '<i data-lucide="x"></i>';
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      ui.dismissToast(null);
+    });
+    actionsEl.appendChild(closeBtn);
+  }
+
+  createIcons({ nameAttr: "data-lucide", attrs: {}, root: island });
+}
+
+function renderPipelineSubCapsule(msg: string, type: ToastType): void {
+  const bar = document.getElementById("pipeline-bar");
+  const capsule = document.getElementById("pipeline-sub-capsule");
+  const textEl = document.getElementById("pipeline-sub-text");
+  const actionsEl = document.getElementById("pipeline-sub-actions");
+  if (!capsule || !textEl || !actionsEl) return;
+
+  // Only show sub-capsule if pipeline bar is active and not minimized
+  if (
+    !bar ||
+    bar.classList.contains("hidden") ||
+    bar.classList.contains("minimized-state")
+  ) {
+    hidePipelineSubCapsule(true);
+    return;
+  }
+
+  capsule.className = `pipeline-sub-capsule active type-${type}`;
+  capsule.classList.remove("hidden");
+
+  const iconName = toastIconNames[type] || "info";
+  const iconEl = capsule.querySelector<HTMLElement>(".sub-capsule-icon");
+  if (iconEl) {
+    iconEl.setAttribute("data-lucide", iconName);
+  }
+  textEl.textContent = msg;
+
+  actionsEl.innerHTML = "";
+  if (type === "error") {
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "sub-capsule-btn";
+    copyBtn.title = "Copy error";
+    copyBtn.innerHTML = '<i data-lucide="copy"></i>';
+    copyBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(msg).then(() => {
+          copyBtn.innerHTML =
+            '<i data-lucide="check" class="text-emerald-400"></i>';
+          createIcons({ nameAttr: "data-lucide", attrs: {}, root: copyBtn });
+          setTimeout(() => {
+            copyBtn.innerHTML = '<i data-lucide="copy"></i>';
+            createIcons({ nameAttr: "data-lucide", attrs: {}, root: copyBtn });
+          }, 1500);
+        });
+      }
+    });
+    actionsEl.appendChild(copyBtn);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "sub-capsule-btn";
+    closeBtn.title = "Dismiss";
+    closeBtn.innerHTML = '<i data-lucide="x"></i>';
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      ui.dismissToast(null);
+    });
+    actionsEl.appendChild(closeBtn);
+  }
+
+  createIcons({ nameAttr: "data-lucide", attrs: {}, root: capsule });
+}
+
+function _applyToastPlacement(immediate: boolean = false): void {
+  if (!_currentToast) {
+    hideDynamicIsland(immediate);
+    hidePipelineSubCapsule(immediate);
+    return;
+  }
+
+  const bar = document.getElementById("pipeline-bar");
+  const isDockedActive =
+    bar &&
+    !bar.classList.contains("hidden") &&
+    !bar.classList.contains("minimized-state");
+
+  if (isDockedActive) {
+    hideDynamicIsland(true);
+    renderPipelineSubCapsule(_currentToast.msg, _currentToast.type);
+  } else {
+    hidePipelineSubCapsule(true);
+    renderDynamicIsland(_currentToast.msg, _currentToast.type);
+  }
+}
 
 export const ui = {
   showProgress(show: boolean): void {
@@ -42,151 +243,56 @@ export const ui = {
     ui.setActive(id);
   },
 
-  /** Show toast notification — returns element for manual dismiss */
+  /** Show toast notification — routes to Sub-Capsule if Pipeline bar is docked, or Dynamic Island if minimized/hidden */
   toast(msg: string, type?: ToastType, duration?: number): ToastEl {
     type = type || "info"; // info | warn | error | success | running
-    if (duration == null) duration = type === "error" ? 10000 : 4000;
-    let container = document.getElementById("toast-container");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "toast-container";
-      container.style.cssText =
-        "position:fixed;top:48px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:6px;pointer-events:none;";
-      document.body.appendChild(container);
+    if (duration == null) duration = type === "error" ? 12000 : 3500;
+
+    if (_toastTimer) {
+      clearTimeout(_toastTimer);
+      _toastTimer = null;
     }
-    const colors: Record<
-      ToastType,
-      { bg: string; border: string; text: string; icon: string }
-    > = {
-      info: {
-        bg: "#1a2332",
-        border: "#264f78",
-        text: "#d4d4d4",
-        icon: "#569cd6",
-      },
-      warn: {
-        bg: "#3d2e00",
-        border: "#a07b00",
-        text: "#f0d060",
-        icon: "#dcdcaa",
-      },
-      error: {
-        bg: "#3d1414",
-        border: "#a03030",
-        text: "#f07070",
-        icon: "#f44747",
-      },
-      success: {
-        bg: "#1a2e1a",
-        border: "#3a7a3a",
-        text: "#d4d4d4",
-        icon: "#4ec9b0",
-      },
-      running: {
-        bg: "#1a2332",
-        border: "#264f78",
-        text: "#d4d4d4",
-        icon: "#569cd6",
-      },
+
+    _currentToast = {
+      msg,
+      type,
+      duration,
+      endTime: duration > 0 ? Date.now() + duration : 0,
     };
-    const c = colors[type] || colors.info;
-    const iconNames: Record<ToastType, string> = {
-      info: "info",
-      warn: "alert-triangle",
-      error: "circle-x",
-      success: "circle-check",
-      running: "loader-2",
-    };
-    const spinCSS =
-      type === "running" ? "animation:spin 1s linear infinite;" : "";
-    const toast = document.createElement("div") as ToastEl;
-    toast.style.cssText =
-      "pointer-events:auto;background:" +
-      c.bg +
-      ";border:1px solid " +
-      c.border +
-      ";color:" +
-      c.text +
-      ";padding:8px 16px;border-radius:6px;font-size:0.78rem;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.4);opacity:0;transform:translateY(-8px);transition:opacity 0.2s,transform 0.2s;white-space:normal;word-break:break-word;max-width:480px;user-select:text;cursor:" +
-      (type === "error" ? "pointer" : "default") +
-      ";";
-    toast.innerHTML =
-      '<i data-lucide="' +
-      iconNames[type] +
-      '" style="width:16px;height:16px;color:' +
-      c.icon +
-      ";flex-shrink:0;" +
-      spinCSS +
-      '"></i><span>' +
-      msg +
-      "</span>";
-    // Error toast: explicit copy button
-    if (type === "error") {
-      const copyBtn = document.createElement("button");
-      copyBtn.innerHTML =
-        '<i data-lucide="copy" style="width:14px;height:14px;"></i>';
-      copyBtn.title = "Copy pesan error";
-      copyBtn.style.cssText =
-        "flex-shrink:0;background:transparent;border:none;color:" +
-        c.text +
-        ";cursor:pointer;padding:2px;display:flex;align-items:center;opacity:0.7;";
-      copyBtn.addEventListener("mouseenter", () => {
-        copyBtn.style.opacity = "1";
-      });
-      copyBtn.addEventListener("mouseleave", () => {
-        copyBtn.style.opacity = "0.7";
-      });
-      copyBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const text = toast.querySelector("span")?.textContent || msg;
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(text).then(() => {
-            copyBtn.innerHTML =
-              '<i data-lucide="check" style="width:14px;height:14px;color:#4ec9b0;"></i>';
-            createIcons({ nameAttr: "data-lucide", attrs: {}, root: copyBtn });
-            setTimeout(() => {
-              copyBtn.innerHTML =
-                '<i data-lucide="copy" style="width:14px;height:14px;"></i>';
-              createIcons({
-                nameAttr: "data-lucide",
-                attrs: {},
-                root: copyBtn,
-              });
-            }, 1500);
-          });
-        }
-      });
-      toast.appendChild(copyBtn);
-    }
-    container.appendChild(toast);
-    createIcons({ nameAttr: "data-lucide", attrs: {}, root: toast });
-    requestAnimationFrame(() => {
-      toast.style.opacity = "1";
-      toast.style.transform = "translateY(0)";
-    });
-    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    _applyToastPlacement(true);
+
+    const toastHandle = document.createElement("div") as ToastEl;
+    toastHandle.textContent = msg;
+
     if (duration > 0) {
-      timer = setTimeout(() => {
-        toast.style.opacity = "0";
-        toast.style.transform = "translateY(-8px)";
-        setTimeout(() => {
-          toast.remove();
-        }, 200);
+      _toastTimer = setTimeout(() => {
+        ui.dismissToast(null);
       }, duration);
+      toastHandle._timer = _toastTimer;
     }
-    toast._timer = timer;
-    return toast;
+
+    return toastHandle;
   },
 
-  /** Dismiss a specific toast */
+  /** Dismiss active toast */
   dismissToast(toast: ToastEl | null): void {
-    if (!toast) return;
-    if (toast._timer) clearTimeout(toast._timer);
-    toast.style.opacity = "0";
-    toast.style.transform = "translateY(-8px)";
-    setTimeout(() => {
-      if (toast.parentNode) toast.remove();
-    }, 200);
+    if (_toastTimer) {
+      clearTimeout(_toastTimer);
+      _toastTimer = null;
+    }
+    if (toast && toast._timer) {
+      clearTimeout(toast._timer);
+    }
+    _currentToast = null;
+
+    hideDynamicIsland(false);
+    hidePipelineSubCapsule(false);
+  },
+
+  /** Sync toast placement instantly on bar state changes (minimize / restore / show / hide) */
+  syncToastPlacement(): void {
+    _applyToastPlacement(true);
   },
 
   /** Bottom-right download notification with progress bar.

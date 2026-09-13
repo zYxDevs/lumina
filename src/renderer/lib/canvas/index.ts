@@ -53,6 +53,7 @@ export interface CanvasAPI {
   renderPageStrip(): void;
   switchPage(idx: number): void;
   removePage(idx: number): void;
+  reorderPage(fromIdx: number, toIdx: number): void;
   generateThumbnail(
     page: import("../../types").Page,
     maxW?: number,
@@ -128,6 +129,7 @@ export const canvas: CanvasAPI = {
   renderPageStrip() {},
   switchPage() {},
   removePage() {},
+  reorderPage() {},
   generateThumbnail() {
     return null;
   },

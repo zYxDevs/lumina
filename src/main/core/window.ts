@@ -37,6 +37,8 @@ export function createWindow(): BrowserWindow {
     minWidth: 1024,
     minHeight: 700,
     title: "Lumina",
+    titleBarStyle: "hidden",
+    titleBarOverlay: { color: "#1e1e1e", symbolColor: "#969696", height: 32 },
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

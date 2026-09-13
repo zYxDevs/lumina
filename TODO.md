@@ -67,5 +67,5 @@
 - [x] fix font fitting visually changed when zoom in/out
 - [ ] fix translate sometimes error reading timeout
 - [x] normalize log and add more debug log
-- [ ] redesign UI
+- [x] redesign UI
 - [ ] testing and hunt another bugs
