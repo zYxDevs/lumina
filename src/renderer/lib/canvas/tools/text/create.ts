@@ -29,6 +29,7 @@ export function createLayer(
   };
   page.layers.push(layer);
   page._selectedLayerId = layer.id;
+  page._expandedLayerId = null;
   return layer;
 }
 

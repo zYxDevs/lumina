@@ -36,6 +36,7 @@ function _loadImageAsPage(filePath: string): Promise<Page | null> {
         backgroundVisible: true,
         _selectedTextIdx: null,
         _selectedLayerId: null,
+        _expandedLayerId: null,
         _selectedMaskId: null,
       };
       resolve(page);
@@ -90,6 +91,7 @@ export async function openImagePaths(filePaths: string[]): Promise<void> {
         backgroundVisible: true,
         _selectedTextIdx: null,
         _selectedLayerId: null,
+        _expandedLayerId: null,
         _selectedMaskId: null,
       });
     }

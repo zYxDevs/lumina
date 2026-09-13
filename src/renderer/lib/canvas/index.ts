@@ -27,6 +27,8 @@ export interface CanvasAPI {
   moveTextDetection(idx: number, dir: number): void;
   setTextDetectionText(idx: number, text: string): void;
   selectLayer(id: string | null): void;
+  /** Expand/collapse the inline editor for a text layer (double-click in sidebar) */
+  expandLayer(id: string | null): void;
   setLayerText(id: string, field: "source" | "translation", text: string): void;
   toggleLayerVisible(id: string): void;
   deleteLayer(id: string): void;
@@ -103,6 +105,7 @@ export const canvas: CanvasAPI = {
   moveTextDetection() {},
   setTextDetectionText() {},
   selectLayer() {},
+  expandLayer() {},
   setLayerText() {},
   toggleLayerVisible() {},
   deleteLayer() {},

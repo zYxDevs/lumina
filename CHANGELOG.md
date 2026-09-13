@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Layer list: double-click to edit.** Single-click now only selects the layer; double-click expands the inline editor (textarea). Applies to both sidebar rows and canvas text-node double-clicks.
+
 ### Fixed
 
 - **Masks now visible in export preview.** Previously, the export window only showed text layers — inpaint and cleanup masks were missing because mask images weren't loaded before compositing.

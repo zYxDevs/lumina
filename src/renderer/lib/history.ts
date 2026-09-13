@@ -216,6 +216,8 @@ export const history = {
     page._selectedTextIdx = snap._selectedTextIdx;
     page.layers = snap.layers as never;
     page._selectedLayerId = snap._selectedLayerId;
+    // Always collapse editor on undo/redo — double-click to re-expand.
+    page._expandedLayerId = null;
     if (typeof snap.backgroundVisible === "boolean")
       page.backgroundVisible = snap.backgroundVisible;
     // Preserve existing mask images when the imagePath matches — avoids

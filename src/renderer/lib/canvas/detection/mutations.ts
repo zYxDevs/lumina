@@ -17,6 +17,7 @@ canvas.deleteTextDetection = function (idx: number): void {
   if (layer && layer.type === "text-dialogue") {
     page.layers.splice(idx, 1);
     if (page._selectedLayerId === layer.id) page._selectedLayerId = null;
+    if (page._expandedLayerId === layer.id) page._expandedLayerId = null;
   }
   if (
     page._selectedTextIdx !== null &&

@@ -68,6 +68,8 @@ export function renderLayerTextNodes(): void {
           delete _lastClickAt[lay.id];
           if (state.activeTool !== "text") tools.setActive("text");
           startEdit(lay.id);
+          // Also expand the sidebar editor for this layer.
+          canvas.expandLayer(lay.id);
           return;
         }
         _lastClickAt[lay.id] = now;

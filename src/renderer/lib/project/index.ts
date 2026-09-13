@@ -219,6 +219,7 @@ export const project = {
         backgroundVisible: pd.backgroundVisible,
         _selectedTextIdx: null,
         _selectedLayerId: null,
+        _expandedLayerId: null,
         _selectedMaskId: null,
         _zoomLevel: pd._zoomLevel,
         _panX: pd._panX,

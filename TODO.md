@@ -61,11 +61,11 @@
 - [x] better font fitting
 - [x] fix mask not visible in export window
 - [x] fix eraser tool visually delayed and cant be dragged
-- [ ] fix how to get apikey 404
+- [x] fix how to get apikey 404
 - [x] refactor codebase to be more modular and maintainable
 - [ ] add multi selection feature
 - [x] fix font fitting visually changed when zoom in/out
-- [ ] fix translate slow loading when cached secret keys are cleared in ram by LMK
+- [ ] fix translate sometimes error reading timeout
 - [x] normalize log and add more debug log
 - [ ] redesign UI
 - [ ] testing and hunt another bugs

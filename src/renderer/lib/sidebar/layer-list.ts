@@ -150,6 +150,7 @@ function virtualRowHTML(
 
 function layerRowHTML(page: Page, layer: PageLayer, idx: number): string {
   const selected = page._selectedLayerId === layer.id;
+  const expanded = page._expandedLayerId === layer.id;
   const kindLabel = i18n.t(KIND_KEYS[layer.type]);
   const name = esc(layerName(layer));
   const isText = layer.type === "text-dialogue" || layer.type === "text-free";
@@ -196,7 +197,8 @@ function layerRowHTML(page: Page, layer: PageLayer, idx: number): string {
   // Expanded editor for the selected text layer — one textarea at a time,
   // switched through the Original | Translation tabs (the other field keeps
   // its content; a dot on the inactive tab shows it's filled).
-  if (selected && isText) {
+  // Only shown after double-click (expanded) to avoid accidental editor pop-ups.
+  if (selected && expanded && isText) {
     const tab = editorTabFor(layer);
     const hasSrc = (layer.source || "").trim().length > 0;
     const hasTr = (layer.translation || "").trim().length > 0;
@@ -235,7 +237,10 @@ export function wireEvents(): void {
   items.forEach(function (el) {
     if (!el.classList.contains("selected")) {
       const id = el.getAttribute("data-layer-id");
-      if (id) delete _editorTabs[id];
+      if (id) {
+        delete _editorTabs[id];
+        // Collapse if this row lost selection.
+      }
     }
   });
   items.forEach(function (el) {
@@ -261,12 +266,38 @@ export function wireEvents(): void {
         return;
       }
 
-      // Click row: select; click again: collapse
-      if (el.classList.contains("selected")) {
-        canvas.selectLayer(null);
+      // Single click: select row; double click: expand editor (text layers only).
+      // Clicking an already-expanded row collapses it.
+      const page = state.getActivePage();
+      const layer = page?.layers.find(function (l) {
+        return l.id === id;
+      });
+      const isTextRow =
+        layer && (layer.type === "text-dialogue" || layer.type === "text-free");
+      if (el.classList.contains("selected") && page?._expandedLayerId === id) {
+        // Already selected + expanded → collapse editor
+        canvas.expandLayer(null);
       } else {
         canvas.selectLayer(id);
       }
+    });
+
+    // Double-click: expand inline editor for text layers.
+    el.addEventListener("dblclick", function (e) {
+      if ((e.target as HTMLElement | null)?.closest(".layer-editor")) return;
+      const id = el.getAttribute("data-layer-id") as string;
+      const page = state.getActivePage();
+      const layer = page?.layers.find(function (l) {
+        return l.id === id;
+      });
+      if (
+        !layer ||
+        (layer.type !== "text-dialogue" && layer.type !== "text-free")
+      )
+        return;
+      // Ensure selected first, then expand.
+      if (page && page._selectedLayerId !== id) canvas.selectLayer(id);
+      canvas.expandLayer(id);
     });
   });
 

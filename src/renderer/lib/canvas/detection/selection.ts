@@ -94,6 +94,7 @@ canvas.selectTextDetection = function (idx: number | null): void {
     if (lid) page._selectedLayerId = lid;
   } else {
     page._selectedLayerId = null;
+    page._expandedLayerId = null;
   }
 
   applyTextSelection(idx);

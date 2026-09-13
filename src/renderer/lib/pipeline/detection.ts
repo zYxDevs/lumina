@@ -105,6 +105,7 @@ export const detection = {
       });
       page.layers = [...dialogueLayers, ...freeLayers];
       page._selectedLayerId = null;
+      page._expandedLayerId = null;
 
       // Fresh boxes — make sure the overlay is visible.
       state.showDetBoxes = true;

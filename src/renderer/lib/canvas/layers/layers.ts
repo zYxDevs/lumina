@@ -20,6 +20,8 @@ canvas.selectLayer = function (id): void {
   const page = state.getActivePage();
   if (!page) return;
   page._selectedLayerId = id;
+  // Collapse editor when switching selection — double-click to re-expand.
+  if (id !== page._expandedLayerId) page._expandedLayerId = null;
   // Mirror to the parallel detection selection so the text box on the
   // canvas highlights when a layer is picked from the sidebar.
   page._selectedTextIdx = textIdxForLayerId(page, id);
@@ -32,6 +34,13 @@ canvas.selectLayer = function (id): void {
     applyTextSelection(null);
     if (sidebar && sidebar.render) sidebar.render();
   }
+};
+
+canvas.expandLayer = function (id): void {
+  const page = state.getActivePage();
+  if (!page) return;
+  page._expandedLayerId = id;
+  if (sidebar && sidebar.render) sidebar.render();
 };
 
 canvas.setLayerText = function (id, field, text): void {
@@ -98,7 +107,10 @@ canvas.deleteLayer = function (id): void {
   if (layer.type === "text-dialogue" && i < page.textDetections.length) {
     page.textDetections.splice(i, 1);
   }
-  if (page._selectedLayerId === id) page._selectedLayerId = null;
+  if (page._selectedLayerId === id) {
+    page._selectedLayerId = null;
+    page._expandedLayerId = null;
+  }
   canvas.render();
   sidebar.render();
   history.snapshot();
